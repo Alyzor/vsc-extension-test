@@ -3,8 +3,9 @@
 import { interfaces } from 'mocha';
 import * as vscode from 'vscode';
 
-import { LoremIpsum } from 'lorem-ipsum';
+import { LoremIpsum, loremIpsum } from 'lorem-ipsum';
 import { prependListener } from 'process';
+import { randomInt } from 'crypto';
 
 
 interface IProperty{
@@ -168,22 +169,52 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(disposable);
 
 	function generateDummyText(interfaceName:string, repeat:number, properties:IProperty[], predefinedBool?:boolean){
-		var finalText:string = "	var dummy"+ interfaceName + " = [ \r\n";
+		var finalText:string = "var dummy"+ interfaceName + " = [ \r\n";
 
 		for(var i= 0; i < repeat;i++){
-			finalText += "{ \r\n";
+			finalText += "	{ \r\n";
 
-				//TODO: Dummy text wil be assigned to each property HERE!!!
+			properties.forEach(prop =>{
 
+				finalText += "		" + prop.name + " = ";
+				
+				switch(prop.type){
+					case "string":
+						finalText += '"' + loremIpsum() + '"';
+					break;
+					case "number":
+						finalText += Math.floor(Math.random()* 200);
+					break;
+					case "boolean":
+						if(predefinedBool){
+							finalText += predefinedBool.toString();
+						}else{
+							const randBool = Math.random() < 0.5;
+							finalText += randBool;
+						}
+					break;
+
+					default:
+						finalText += "new " + prop.type;
+					break;
+				}
+				if(prop === properties[properties.length-1]){
+					finalText += "\r\n";
+				}else{
+					finalText += ",\r\n";
+				}
+			});
 
 			if(i === repeat-1){
-				finalText += "} \r\n";
+				finalText += "}";
 			}else{
 				finalText += "}, \r\n";
 			}
 		}
 
 		finalText += "];";
+
+		console.log(finalText);
 
 		//return finalText to IDE under user's current line (newLine first, then declaration)
 	}
