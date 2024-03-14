@@ -1,12 +1,7 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
-import { interfaces } from 'mocha';
 import * as vscode from 'vscode';
-
-import { LoremIpsum, loremIpsum } from 'lorem-ipsum';
-import { prependListener } from 'process';
-import { randomInt } from 'crypto';
-
+import { loremIpsum } from 'lorem-ipsum';
 
 interface IProperty{
 	name:string,
@@ -62,7 +57,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 	}
 
-	let disposable = vscode.commands.registerCommand('tests.populateArray', async () => {
+	let populateArray = vscode.commands.registerCommand('tests.populateArray', async () => {
 
 		var openedFile = vscode.window.activeTextEditor?.document;
 
@@ -166,7 +161,12 @@ export function activate(context: vscode.ExtensionContext) {
 		}
 	});
 
-	context.subscriptions.push(disposable);
+	let displaySelectedText = vscode.commands.registerCommand('tests.aaa', () => {
+
+	});
+
+	context.subscriptions.push(populateArray);
+	context.subscriptions.push(displaySelectedText);
 
 	function generateDummyText(interfaceName:string, repeat:number, properties:IProperty[], predefinedBool?:boolean){
 		var finalText:string = "var dummy"+ interfaceName + " = [ \r\n";
@@ -176,7 +176,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 			properties.forEach(prop =>{
 
-				finalText += "		" + prop.name + " = ";
+				finalText += "		" + prop.name + ": ";
 				
 				switch(prop.type){
 					case "string":
@@ -216,6 +216,22 @@ export function activate(context: vscode.ExtensionContext) {
 
 		console.log(finalText);
 
+		//get user's current positions
+		var userSelection = vscode.window.activeTextEditor?.selection;
+
+		console.log(userSelection?.active.line);
+		console.log(userSelection?.isEmpty);
+		console.log(userSelection?.start.character);
+
+		var editor = vscode.window.activeTextEditor;
+
+		editor?.edit(builder =>{
+			builder.insert(userSelection!.active, "\r\n" + finalText);
+		});
+
+		var lineAdded = userSelection!.active.line +2;
+
+		showMessage("Created placeholder dummy" + interfaceName + " on line " + lineAdded , false);
 		//return finalText to IDE under user's current line (newLine first, then declaration)
 	}
 }

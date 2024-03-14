@@ -14,8 +14,8 @@
   "contributes": {
     "commands": [
       {
-        "command": "tests.helloWorld",
-        "title": "Hello World"
+        "command": "tests.displaySelection",
+        "title": "Display Selected Text"
       },
       {
         "command": "tests.populateArray",

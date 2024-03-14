@@ -30,6 +30,8 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.deactivate = exports.activate = void 0;
+// The module 'vscode' contains the VS Code extensibility API
+// Import the module and reference it with the alias vscode in your code below
 const vscode = __importStar(__webpack_require__(1));
 const lorem_ipsum_1 = __webpack_require__(2);
 // This method is called when your extension is activated
@@ -68,7 +70,7 @@ function activate(context) {
             vscode.window.showInformationMessage(message);
         }
     }
-    let disposable = vscode.commands.registerCommand('tests.populateArray', async () => {
+    let populateArray = vscode.commands.registerCommand('tests.populateArray', async () => {
         var openedFile = vscode.window.activeTextEditor?.document;
         if (!openedFile) {
             showMessage("Please open a file!", true);
@@ -154,13 +156,16 @@ function activate(context) {
             generateDummyText(selectInterface.label, parseInt(selectQuantity), propertyList, Boolean(JSON.parse(selectBoolValue.label)));
         }
     });
-    context.subscriptions.push(disposable);
+    let displaySelectedText = vscode.commands.registerCommand('tests.aaa', () => {
+    });
+    context.subscriptions.push(populateArray);
+    context.subscriptions.push(displaySelectedText);
     function generateDummyText(interfaceName, repeat, properties, predefinedBool) {
         var finalText = "var dummy" + interfaceName + " = [ \r\n";
         for (var i = 0; i < repeat; i++) {
             finalText += "	{ \r\n";
             properties.forEach(prop => {
-                finalText += "		" + prop.name + " = ";
+                finalText += "		" + prop.name + ": ";
                 switch (prop.type) {
                     case "string":
                         finalText += '"' + (0, lorem_ipsum_1.loremIpsum)() + '"';
@@ -197,6 +202,17 @@ function activate(context) {
         }
         finalText += "];";
         console.log(finalText);
+        //get user's current positions
+        var userSelection = vscode.window.activeTextEditor?.selection;
+        console.log(userSelection?.active.line);
+        console.log(userSelection?.isEmpty);
+        console.log(userSelection?.start.character);
+        var editor = vscode.window.activeTextEditor;
+        editor?.edit(builder => {
+            builder.insert(userSelection.active, "\r\n" + finalText);
+        });
+        var lineAdded = userSelection.active.line + 2;
+        showMessage("Created placeholder dummy" + interfaceName + " on line " + lineAdded, false);
         //return finalText to IDE under user's current line (newLine first, then declaration)
     }
 }
