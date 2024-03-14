@@ -12,6 +12,7 @@
 > - Criar, editar, e remover ficheiros - TODO 
 
 > Editar em zonas específicas
+>   - Editar na linha em que o utilizador tem o cursor - DONE
 
 > Criar, editar, e remover folders - TODO
 
