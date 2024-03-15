@@ -2,6 +2,8 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 import { loremIpsum } from 'lorem-ipsum';
+import { displayHighlightedText } from './displayTextSelection';
+import { showOpenFolderTree } from './showOpenFolderTree';
 
 interface IProperty{
 	name:string,
@@ -161,12 +163,13 @@ export function activate(context: vscode.ExtensionContext) {
 		}
 	});
 
-	let displaySelectedText = vscode.commands.registerCommand('tests.aaa', () => {
+	let displaySelectedText = vscode.commands.registerCommand('tests.displaySelection', () => displayHighlightedText() );
 
-	});
+	let showFileTree = vscode.commands.registerCommand('tests.showFileTree', ()=> showOpenFolderTree());
 
 	context.subscriptions.push(populateArray);
 	context.subscriptions.push(displaySelectedText);
+	context.subscriptions.push(showFileTree);
 
 	function generateDummyText(interfaceName:string, repeat:number, properties:IProperty[], predefinedBool?:boolean){
 		var finalText:string = "var dummy"+ interfaceName + " = [ \r\n";

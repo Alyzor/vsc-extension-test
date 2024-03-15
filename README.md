@@ -1,10 +1,10 @@
-> Escrever na console de debug
+> Escrever na console de debug - DONE
 
 > Mandar alertas - DONE
 
 > Obter o texto do editor de código - DONE
 
-> Obter o texto selecionado pelo o utilizador - TODO
+> Obter o texto selecionado pelo o utilizador - DONE
 
 > Atravessar o projeto todo (árvore de folders e ficheiros) - TODO
 

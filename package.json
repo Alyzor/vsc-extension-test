@@ -15,11 +15,18 @@
     "commands": [
       {
         "command": "tests.displaySelection",
-        "title": "Display Selected Text"
+        "title": "Display Selected Text",
+        "category": "Tests"
       },
       {
         "command": "tests.populateArray",
-        "title": "Populate Array"
+        "title": "Populate Array",
+        "category": "Tests"
+      },
+      {
+        "command": "tests.showFileTree",
+        "title": "Display Solution's file tree",
+        "category": "Tests"
       }
     ]
   },

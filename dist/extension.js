@@ -34,6 +34,8 @@ exports.deactivate = exports.activate = void 0;
 // Import the module and reference it with the alias vscode in your code below
 const vscode = __importStar(__webpack_require__(1));
 const lorem_ipsum_1 = __webpack_require__(2);
+const displayTextSelection_1 = __webpack_require__(17);
+const showOpenFolderTree_1 = __webpack_require__(18);
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
 function activate(context) {
@@ -156,10 +158,11 @@ function activate(context) {
             generateDummyText(selectInterface.label, parseInt(selectQuantity), propertyList, Boolean(JSON.parse(selectBoolValue.label)));
         }
     });
-    let displaySelectedText = vscode.commands.registerCommand('tests.aaa', () => {
-    });
+    let displaySelectedText = vscode.commands.registerCommand('tests.displaySelection', () => (0, displayTextSelection_1.displayHighlightedText)());
+    let showFileTree = vscode.commands.registerCommand('tests.showFileTree', () => (0, showOpenFolderTree_1.showOpenFolderTree)());
     context.subscriptions.push(populateArray);
     context.subscriptions.push(displaySelectedText);
+    context.subscriptions.push(showFileTree);
     function generateDummyText(interfaceName, repeat, properties, predefinedBool) {
         var finalText = "var dummy" + interfaceName + " = [ \r\n";
         for (var i = 0; i < repeat; i++) {
@@ -855,6 +858,160 @@ var makeArrayOfStrings = function makeArrayOfStrings(length, makeString) {
 var _default = makeArrayOfStrings;
 exports["default"] = _default;
 //# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJtYWtlQXJyYXlPZlN0cmluZ3MiLCJsZW5ndGgiLCJtYWtlU3RyaW5nIiwiYXJyIiwibWFrZUFycmF5T2ZMZW5ndGgiLCJtYXAiXSwic291cmNlcyI6WyIuLi8uLi9zcmMvdXRpbC9tYWtlQXJyYXlPZlN0cmluZ3MudHMiXSwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IG1ha2VBcnJheU9mTGVuZ3RoIGZyb20gXCIuL21ha2VBcnJheU9mTGVuZ3RoXCI7XHJcbi8qKlxyXG4gKiBAcGFyYW0gbGVuZ3RoICBMZW5ndGggXCJ4XCIuXHJcbiAqIEByZXR1cm5zICAgICAgIEFuIGFycmF5IG9mIHN0cmluZ3Mgb2YgbGVuZ3RoIFwieFwiLlxyXG4gKi9cclxuY29uc3QgbWFrZUFycmF5T2ZTdHJpbmdzID0gKFxyXG4gIGxlbmd0aDogbnVtYmVyLFxyXG4gIG1ha2VTdHJpbmc6ICgpID0+IHN0cmluZyxcclxuKTogc3RyaW5nW10gPT4ge1xyXG4gIGNvbnN0IGFyciA9IG1ha2VBcnJheU9mTGVuZ3RoKGxlbmd0aCk7XHJcbiAgcmV0dXJuIGFyci5tYXAoKCkgPT4gbWFrZVN0cmluZygpKTtcclxufTtcclxuXHJcbmV4cG9ydCBkZWZhdWx0IG1ha2VBcnJheU9mU3RyaW5ncztcclxuIl0sIm1hcHBpbmdzIjoiOzs7Ozs7O0FBQUE7Ozs7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBLElBQU1BLGtCQUFrQixHQUFHLFNBQXJCQSxrQkFBcUIsQ0FDekJDLE1BRHlCLEVBRXpCQyxVQUZ5QixFQUdaO0VBQ2IsSUFBTUMsR0FBRyxHQUFHLElBQUFDLDZCQUFBLEVBQWtCSCxNQUFsQixDQUFaO0VBQ0EsT0FBT0UsR0FBRyxDQUFDRSxHQUFKLENBQVE7SUFBQSxPQUFNSCxVQUFVLEVBQWhCO0VBQUEsQ0FBUixDQUFQO0FBQ0QsQ0FORDs7ZUFRZUYsa0IifQ==
+
+/***/ }),
+/* 17 */
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.displayHighlightedText = void 0;
+const vscode = __importStar(__webpack_require__(1));
+function displayHighlightedText() {
+    var editor = vscode.window.activeTextEditor;
+    if (editor) {
+        if (editor.selection) {
+            vscode.window.showInformationMessage("Selected Text: " + editor.document.getText(editor.selection));
+        }
+        else {
+            vscode.window.showInformationMessage("No text has been selected!");
+        }
+    }
+    else {
+        vscode.window.showInformationMessage("Please open a file!");
+    }
+}
+exports.displayHighlightedText = displayHighlightedText;
+
+
+/***/ }),
+/* 18 */
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.showOpenFolderTree = void 0;
+const vscode = __importStar(__webpack_require__(1));
+const fs = __importStar(__webpack_require__(19));
+function showOpenFolderTree() {
+    if (vscode.workspace.workspaceFolders?.length === 0) {
+        var filePath = vscode.workspace.workspaceFolders[0].uri;
+        recursiveReadDirectory(filePath);
+    }
+    else {
+        vscode.window.showErrorMessage("No workspace detected! Please open a folder.");
+    }
+}
+exports.showOpenFolderTree = showOpenFolderTree;
+async function recursiveReadDirectory(dir) {
+    var currentDir = [];
+    await vscode.workspace.fs.readDirectory(dir).then(result => currentDir = result);
+    var splitDirectory = dir.toString().split('/');
+    var fileList = [];
+    var dirList = [];
+    console.log("pasta aberta: " + splitDirectory[splitDirectory.length - 1]);
+    console.log("---------------------");
+    currentDir.forEach(async (i) => {
+        var tempUri = vscode.Uri.parse(dir.toString() + "/" + i[0]);
+        switch (i[1]) {
+            case 1:
+                fileList.push(tempUri);
+                break;
+            case 2:
+                dirList.push(tempUri);
+                break;
+            case 64:
+                if (symLinkIsFile(tempUri)) {
+                    fileList.push(tempUri);
+                }
+                else {
+                    fileList.push(tempUri);
+                }
+                break;
+            default:
+                vscode.window.showErrorMessage("Error!: " + i[0] + " is an unknown file!");
+                break;
+        }
+    });
+    for (const file of fileList) {
+        var fileText = "";
+        await readFile(file).then(text => fileText = text);
+        console.log(fileText);
+    }
+    ;
+    for (const dir of dirList) {
+        recursiveReadDirectory(dir);
+    }
+    ;
+    console.log("---------------------");
+}
+async function readFile(file) {
+    try {
+        const content = await vscode.workspace.fs.readFile(file);
+        return Buffer.from(content).toString();
+    }
+    catch (error) {
+        vscode.window.showErrorMessage("Error reading file " + file + "!\n " + error);
+        return undefined;
+    }
+}
+function symLinkIsFile(path) {
+    const targetStats = fs.statSync(path.toString());
+    return targetStats.isDirectory() || targetStats.isFile();
+}
+
+
+/***/ }),
+/* 19 */
+/***/ ((module) => {
+
+module.exports = require("fs");
 
 /***/ })
 /******/ 	]);
