@@ -940,7 +940,7 @@ exports.showOpenFolderTree = void 0;
 const vscode = __importStar(__webpack_require__(1));
 const fs = __importStar(__webpack_require__(19));
 function showOpenFolderTree() {
-    if (vscode.workspace.workspaceFolders?.length === 0) {
+    if (vscode.workspace.workspaceFolders) {
         var filePath = vscode.workspace.workspaceFolders[0].uri;
         recursiveReadDirectory(filePath);
     }

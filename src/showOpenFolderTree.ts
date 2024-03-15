@@ -3,7 +3,7 @@ import * as vscode from 'vscode';
 import * as fs from 'fs';
 
 export function showOpenFolderTree(){
-    if(vscode.workspace.workspaceFolders?.length === 0){
+    if(vscode.workspace.workspaceFolders){
         var filePath = vscode.workspace.workspaceFolders![0].uri!;
         recursiveReadDirectory(filePath);
     }else{
