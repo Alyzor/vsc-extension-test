@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
-import { generalUtils } from '../utils/general';
-import { workspaceNavigation } from '../utils/workspaceNavigation';
+import * as  generalUtils from '../utils/general';
+import * as workspaceNavigation from '../utils/workspaceNavigation';
 
 export async function folderCUD(){
 
@@ -48,7 +48,7 @@ interface folderDetails{
 }
 
 async function createNewFolder(){
-    let existingFolders = await workspaceNavigation.getWorkspaceFolders();
+    let existingFolders = await workspaceNavigation.getWorkspaceFiles();
 
     if(existingFolders === undefined){
          return; 
@@ -76,6 +76,22 @@ async function createNewFolder(){
     }
     
     //TODO: display folders as tree and make user select where to store new folder.
+    
+}
+
+function organizeFolderInPickItem(folderList:folderDetails[]){
+    // var organizedFolders:vscode.QuickPickItem[] = [];
+    // for(let mainFolder of folderList){
+    //     for(let secondaryFolder of folderList){
+    //         if(mainFolder !== secondaryFolder){
+    //             if(secondaryFolder.uri.toString().includes(mainFolder.uri.toString()))
+    //             {
+    //                 let newQuickPickItem:vscode.QuickPickItem = {label: secondaryFolder.name, value: }
+    //             }
+    //         }
+    //     }
+    // }
+
 }
 
 function renameFolder(){

@@ -1,23 +1,24 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs';
-import { generalUtils } from './general';
+import * as generalUtils from './general';
 
 interface workspaceResult {
     folders: vscode.Uri[],
     files: vscode.Uri[]
 }
 
-export class workspaceNavigation{
     /**
      * Returns all files and folders present on the user's workspace in an URI format
      * 
      * USAGE EXAMPLE: 
      * ``` let res = await getWorkspaceFilesAndFolders(); ```
      * @returns workspaceResult (folders AND files present on the user's workspace) | undefined.
-     */
-    static async getWorkspaceFilesAndFolders():Promise<workspaceResult | undefined>{
+     *
+     * */
+     
+    export async function getWorkspaceFilesAndFolders():Promise<workspaceResult | undefined>{
         try {
-            const res = await workspaceNavigation.fetchRequestedDataFromWorkspace();
+            const res = await fetchRequestedDataFromWorkspace();
             if(res === undefined){
                 return undefined;
             }else{
@@ -28,6 +29,8 @@ export class workspaceNavigation{
             return undefined;
         }
     }
+
+
     /**
      * Returns an array with URI links of all files present on the current workspace.
      * 
@@ -35,10 +38,10 @@ export class workspaceNavigation{
      * ``` let res = await getWorkspaceFiles(); ```
      * @returns vscodde.Uri[] | undefined
      */
-    static  async getWorkspaceFiles():Promise<vscode.Uri[] | undefined>
+    export async function getWorkspaceFiles():Promise<vscode.Uri[] | undefined>
     {    
         try {
-            const res = await workspaceNavigation.fetchRequestedDataFromWorkspace();
+            const res = await fetchRequestedDataFromWorkspace();
             if (res === undefined) {
                 return undefined;
             } else {
@@ -50,6 +53,8 @@ export class workspaceNavigation{
         }
     }
 
+    //TOO
+
     /**
      * Returns an array with URI links of all folders/directories present on the current workspace.
      * 
@@ -57,10 +62,10 @@ export class workspaceNavigation{
      * ``` let res = await getWorkspaceFolders(); ```
      * @returns vscodde.Uri[] | undefined
      */
-    static async getWorkspaceFolders()
+    export async function getWorkspaceFolders()
     {    
         try {
-            const res = await workspaceNavigation.fetchRequestedDataFromWorkspace();
+            const res = await fetchRequestedDataFromWorkspace();
             if (res === undefined) {
                 return undefined;
             } else {
@@ -72,7 +77,7 @@ export class workspaceNavigation{
         }
     }
 
-    private static async fetchRequestedDataFromWorkspace():Promise<workspaceResult | undefined>{
+    async function fetchRequestedDataFromWorkspace():Promise<workspaceResult | undefined>{
         if(!vscode.workspace.workspaceFolders){
             generalUtils.showMessage("No workspace detected.", true);
             return undefined; 
@@ -81,7 +86,7 @@ export class workspaceNavigation{
         var result:workspaceResult = {folders:[], files:[]};
     
         for(const folder of vscode.workspace.workspaceFolders){
-            await this.recursiveGetFolders(folder.uri).then(res =>{
+            await recursiveGetFolders(folder.uri).then(res =>{
                 result.folders.push(folder.uri);
                 result.files = result.files.concat(res.files);
                 result.folders = result.folders.concat(res.folders);
@@ -91,7 +96,7 @@ export class workspaceNavigation{
         return result;
     }
 
-    private static async recursiveGetFolders(uri:vscode.Uri):Promise<workspaceResult>{
+    async function recursiveGetFolders(uri:vscode.Uri):Promise<workspaceResult>{
         var currentDirectory:[string,vscode.FileType][] = [];
 
         await vscode.workspace.fs.readDirectory(uri).then(result => currentDirectory = result);
@@ -122,7 +127,7 @@ export class workspaceNavigation{
 
         var finalDirs = returnDir;
         for(const dir of returnDir){
-            await workspaceNavigation.recursiveGetFolders(dir).then(res =>{
+            await recursiveGetFolders(dir).then(res =>{
                 finalDirs = finalDirs.concat(res.folders);
                 returnFiles = returnFiles.concat(res.files);
                 });
@@ -131,9 +136,8 @@ export class workspaceNavigation{
         return finalResponse;
     }
    
-    private static symLinkIsFile(path:vscode.Uri):boolean{
+    function symLinkIsFile(path:vscode.Uri):boolean{
         var symLink = fs.statSync(path.toString());
 
         return symLink.isFile();
     }
-}

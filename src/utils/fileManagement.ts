@@ -1,7 +1,6 @@
 import * as vscode from 'vscode';
-import { generalUtils } from './general';
+import * as generalUtils from './general';
 
-export class fileUtils{
     /**
      * Creates a new file in the specified directory.
      * 
@@ -9,7 +8,7 @@ export class fileUtils{
      * @param {string} fileName Specified name for the new file.
      * @param {string} extension Specified extension for the new file.
      */
-    static newFile(file:vscode.TextEditor, extension:string){
+    export function newFile(file:vscode.TextEditor, extension:string){
 
     }
 
@@ -21,7 +20,7 @@ export class fileUtils{
      * 
      * @returns {string}
      */
-    static readOpenedFile(file:vscode.TextEditor, selection?: vscode.Selection): string{
+    export function readOpenedFile(file:vscode.TextEditor, selection?: vscode.Selection): string{
         return file.document.getText(selection);
     }
 
@@ -32,7 +31,7 @@ export class fileUtils{
      * 
      * @returns {string}
      */
-    static async readFileOnFS(uri:vscode.Uri): Promise<string|undefined>{
+    export async function readFileOnFS(uri:vscode.Uri): Promise<string|undefined>{
         if(vscode.workspace.workspaceFolders){
             try{
                 var fileContent = await vscode.workspace.fs.readFile(uri);
@@ -45,4 +44,3 @@ export class fileUtils{
             return undefined;
         }
     }
-}

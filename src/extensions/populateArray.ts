@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { generalUtils } from '../utils/general';
+import * as generalUtils from '../utils/general';
 import { loremIpsum } from 'lorem-ipsum';
 
 export async function populateArray(){

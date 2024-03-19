@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
-import { generalUtils } from '../utils/general';
-import { fileUtils } from '../utils/fileManagement';
+import * as generalUtils from '../utils/general';
+import * as fileUtils from '../utils/fileManagement';
 
 export function displayHighlightedText()
 {

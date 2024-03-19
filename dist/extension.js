@@ -717,20 +717,20 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.displayHighlightedText = void 0;
 const vscode = __importStar(__webpack_require__(1));
-const general_1 = __webpack_require__(23);
+const generalUtils = __importStar(__webpack_require__(23));
 const fileManagement_1 = __webpack_require__(24);
 function displayHighlightedText() {
     var editor = vscode.window.activeTextEditor;
     if (editor) {
         if (editor.selection) {
-            general_1.generalUtils.showMessage("Selected Text: " + fileManagement_1.fileUtils.readOpenedFile(editor, editor.selection), false);
+            generalUtils.showMessage("Selected Text: " + fileManagement_1.fileUtils.readOpenedFile(editor, editor.selection), false);
         }
         else {
-            general_1.generalUtils.showMessage("No text has been selected!", true);
+            generalUtils.showMessage("No text has been selected!", true);
         }
     }
     else {
-        general_1.generalUtils.showMessage("Please open a file!", true);
+        generalUtils.showMessage("Please open a file!", true);
     }
 }
 exports.displayHighlightedText = displayHighlightedText;
@@ -767,8 +767,8 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.folderCUD = void 0;
 const vscode = __importStar(__webpack_require__(1));
-const general_1 = __webpack_require__(23);
-const workspaceNavigation_1 = __webpack_require__(22);
+const generalUtils = __importStar(__webpack_require__(23));
+const workspaceNavigation = __importStar(__webpack_require__(22));
 async function folderCUD() {
     var userSelections = await vscode.window.showQuickPick([
         {
@@ -788,7 +788,7 @@ async function folderCUD() {
         canPickMany: false
     });
     if (!userSelections) {
-        general_1.generalUtils.showMessage("Please select an option!", true);
+        generalUtils.showMessage("Please select an option!", true);
         return;
     }
     if (userSelections.value === "create") {
@@ -803,7 +803,7 @@ async function folderCUD() {
 }
 exports.folderCUD = folderCUD;
 async function createNewFolder() {
-    let existingFolders = await workspaceNavigation_1.workspaceNavigation.getWorkspaceFolders();
+    let existingFolders = await workspaceNavigation.getWorkspaceFiles();
     if (existingFolders === undefined) {
         return;
     }
@@ -815,7 +815,7 @@ async function createNewFolder() {
         return;
     }
     else if (folderName === "") {
-        general_1.generalUtils.showMessage("Please input a name for your new folder!", true);
+        generalUtils.showMessage("Please input a name for your new folder!", true);
     }
     var folderList = [];
     for (let folder of existingFolders) {
@@ -825,6 +825,19 @@ async function createNewFolder() {
         folderList.push(folderPush);
     }
     //TODO: display folders as tree and make user select where to store new folder.
+}
+function organizeFolderInPickItem(folderList) {
+    // var organizedFolders:vscode.QuickPickItem[] = [];
+    // for(let mainFolder of folderList){
+    //     for(let secondaryFolder of folderList){
+    //         if(mainFolder !== secondaryFolder){
+    //             if(secondaryFolder.uri.toString().includes(mainFolder.uri.toString()))
+    //             {
+    //                 let newQuickPickItem:vscode.QuickPickItem = {label: secondaryFolder.name, value: }
+    //             }
+    //         }
+    //     }
+    // }
 }
 function renameFolder() {
 }
@@ -840,14 +853,37 @@ module.exports = require("fs");
 
 /***/ }),
 /* 20 */
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.showOpenFolderTree = void 0;
-const workspaceNavigation_1 = __webpack_require__(22);
+const workspaceNavigation = __importStar(__webpack_require__(22));
 function showOpenFolderTree() {
-    workspaceNavigation_1.workspaceNavigation.getWorkspaceFilesAndFolders().then(res => console.log(res));
+    workspaceNavigation.getWorkspaceFilesAndFolders().then(res => console.log(res));
 }
 exports.showOpenFolderTree = showOpenFolderTree;
 
@@ -883,16 +919,16 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.populateArray = void 0;
 const vscode = __importStar(__webpack_require__(1));
-const general_1 = __webpack_require__(23);
+const generalUtils = __importStar(__webpack_require__(23));
 const lorem_ipsum_1 = __webpack_require__(2);
 async function populateArray() {
     var openedFile = vscode.window.activeTextEditor?.document;
     if (!openedFile) {
-        general_1.generalUtils.showMessage("Please open a file!", true);
+        generalUtils.showMessage("Please open a file!", true);
     }
     //Checking language
     if (openedFile?.languageId !== "typescript") {
-        general_1.generalUtils.showMessage("Please run the extension on a .ts file!", true);
+        generalUtils.showMessage("Please run the extension on a .ts file!", true);
         return;
     }
     var interfaceList = getDocumentInterfaceListName(openedFile.getText());
@@ -1024,7 +1060,7 @@ function generateDummyText(interfaceName, repeat, properties, predefinedBool) {
         builder.insert(userSelection.active, "\r\n" + finalText);
     });
     var lineAdded = userSelection.active.line + 2;
-    general_1.generalUtils.showMessage("Created placeholder dummy" + interfaceName + " on line " + lineAdded, false);
+    generalUtils.showMessage("Created placeholder dummy" + interfaceName + " on line " + lineAdded, false);
     //return finalText to IDE under user's current line (newLine first, then declaration)
 }
 function getDocumentInterfaceListName(documentText) {
@@ -1083,139 +1119,141 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.workspaceNavigation = void 0;
+exports.getWorkspaceFolders = exports.getWorkspaceFiles = exports.getWorkspaceFilesAndFolders = void 0;
 const vscode = __importStar(__webpack_require__(1));
 const fs = __importStar(__webpack_require__(19));
-const general_1 = __webpack_require__(23);
-class workspaceNavigation {
-    /**
-     * Returns all files and folders present on the user's workspace in an URI format
-     *
-     * USAGE EXAMPLE:
-     * ``` let res = await getWorkspaceFilesAndFolders(); ```
-     * @returns workspaceResult (folders AND files present on the user's workspace) | undefined.
-     */
-    static async getWorkspaceFilesAndFolders() {
-        try {
-            const res = await workspaceNavigation.fetchRequestedDataFromWorkspace();
-            if (res === undefined) {
-                return undefined;
-            }
-            else {
-                return res;
-            }
-        }
-        catch (error) {
-            console.error("Error fetching workspace data:", error);
+const generalUtils = __importStar(__webpack_require__(23));
+/**
+ * Returns all files and folders present on the user's workspace in an URI format
+ *
+ * USAGE EXAMPLE:
+ * ``` let res = await getWorkspaceFilesAndFolders(); ```
+ * @returns workspaceResult (folders AND files present on the user's workspace) | undefined.
+ *
+ * */
+async function getWorkspaceFilesAndFolders() {
+    try {
+        const res = await fetchRequestedDataFromWorkspace();
+        if (res === undefined) {
             return undefined;
         }
-    }
-    /**
-     * Returns an array with URI links of all files present on the current workspace.
-     *
-     * USAGE EXAMPLE:
-     * ``` let res = await getWorkspaceFiles(); ```
-     * @returns vscodde.Uri[] | undefined
-     */
-    static async getWorkspaceFiles() {
-        try {
-            const res = await workspaceNavigation.fetchRequestedDataFromWorkspace();
-            if (res === undefined) {
-                return undefined;
-            }
-            else {
-                return res.files;
-            }
-        }
-        catch (error) {
-            console.error("Error fetching workspace files:", error);
-            return undefined;
+        else {
+            return res;
         }
     }
-    /**
-     * Returns an array with URI links of all folders/directories present on the current workspace.
-     *
-     * USAGE EXAMPLE:
-     * ``` let res = await getWorkspaceFolders(); ```
-     * @returns vscodde.Uri[] | undefined
-     */
-    static async getWorkspaceFolders() {
-        try {
-            const res = await workspaceNavigation.fetchRequestedDataFromWorkspace();
-            if (res === undefined) {
-                return undefined;
-            }
-            else {
-                return res.folders;
-            }
-        }
-        catch (error) {
-            console.error("Error fetching workspace files:", error);
-            return undefined;
-        }
-    }
-    static async fetchRequestedDataFromWorkspace() {
-        if (!vscode.workspace.workspaceFolders) {
-            general_1.generalUtils.showMessage("No workspace detected.", true);
-            return undefined;
-        }
-        var result = { folders: [], files: [] };
-        for (const folder of vscode.workspace.workspaceFolders) {
-            await this.recursiveGetFolders(folder.uri).then(res => {
-                result.folders.push(folder.uri);
-                result.files = result.files.concat(res.files);
-                result.folders = result.folders.concat(res.folders);
-            });
-        }
-        ;
-        return result;
-    }
-    static async recursiveGetFolders(uri) {
-        var currentDirectory = [];
-        await vscode.workspace.fs.readDirectory(uri).then(result => currentDirectory = result);
-        var returnDir = [];
-        var returnFiles = [];
-        for (const file of currentDirectory) {
-            var tempUri = vscode.Uri.parse(uri.toString() + "/" + file[0]);
-            if (file[1] === vscode.FileType.Directory) {
-                returnDir.push(tempUri);
-            }
-            else if (file[1] === vscode.FileType.File) {
-                returnFiles.push(tempUri);
-            }
-            else if (file[1] === vscode.FileType.SymbolicLink) {
-                const target = fs.readlinkSync(tempUri.toString());
-                const targetStat = fs.statSync(target);
-                if (targetStat.isDirectory()) {
-                    returnDir.push(tempUri);
-                }
-                else if (targetStat.isFile()) {
-                    returnFiles.push(tempUri);
-                }
-                else {
-                    console.error("Unknown file type for symbolic link target:", target);
-                }
-            }
-            else {
-                general_1.generalUtils.showMessage("Error! Couldn't read file " + file[0] + "!", true);
-            }
-        }
-        var finalDirs = returnDir;
-        for (const dir of returnDir) {
-            await workspaceNavigation.recursiveGetFolders(dir).then(res => {
-                finalDirs = finalDirs.concat(res.folders);
-                returnFiles = returnFiles.concat(res.files);
-            });
-        }
-        var finalResponse = { folders: finalDirs, files: returnFiles };
-        return finalResponse;
-    }
-    static symLinkIsFile(path) {
-        var symLink = fs.statSync(path.toString());
-        return symLink.isFile();
+    catch (error) {
+        console.error("Error fetching workspace data:", error);
+        return undefined;
     }
 }
-exports.workspaceNavigation = workspaceNavigation;
+exports.getWorkspaceFilesAndFolders = getWorkspaceFilesAndFolders;
+/**
+ * Returns an array with URI links of all files present on the current workspace.
+ *
+ * USAGE EXAMPLE:
+ * ``` let res = await getWorkspaceFiles(); ```
+ * @returns vscodde.Uri[] | undefined
+ */
+async function getWorkspaceFiles() {
+    try {
+        const res = await fetchRequestedDataFromWorkspace();
+        if (res === undefined) {
+            return undefined;
+        }
+        else {
+            return res.files;
+        }
+    }
+    catch (error) {
+        console.error("Error fetching workspace files:", error);
+        return undefined;
+    }
+}
+exports.getWorkspaceFiles = getWorkspaceFiles;
+//TOO
+/**
+ * Returns an array with URI links of all folders/directories present on the current workspace.
+ *
+ * USAGE EXAMPLE:
+ * ``` let res = await getWorkspaceFolders(); ```
+ * @returns vscodde.Uri[] | undefined
+ */
+async function getWorkspaceFolders() {
+    try {
+        const res = await fetchRequestedDataFromWorkspace();
+        if (res === undefined) {
+            return undefined;
+        }
+        else {
+            return res.folders;
+        }
+    }
+    catch (error) {
+        console.error("Error fetching workspace files:", error);
+        return undefined;
+    }
+}
+exports.getWorkspaceFolders = getWorkspaceFolders;
+async function fetchRequestedDataFromWorkspace() {
+    if (!vscode.workspace.workspaceFolders) {
+        generalUtils.showMessage("No workspace detected.", true);
+        return undefined;
+    }
+    var result = { folders: [], files: [] };
+    for (const folder of vscode.workspace.workspaceFolders) {
+        await recursiveGetFolders(folder.uri).then(res => {
+            result.folders.push(folder.uri);
+            result.files = result.files.concat(res.files);
+            result.folders = result.folders.concat(res.folders);
+        });
+    }
+    ;
+    return result;
+}
+async function recursiveGetFolders(uri) {
+    var currentDirectory = [];
+    await vscode.workspace.fs.readDirectory(uri).then(result => currentDirectory = result);
+    var returnDir = [];
+    var returnFiles = [];
+    for (const file of currentDirectory) {
+        var tempUri = vscode.Uri.parse(uri.toString() + "/" + file[0]);
+        if (file[1] === vscode.FileType.Directory) {
+            returnDir.push(tempUri);
+        }
+        else if (file[1] === vscode.FileType.File) {
+            returnFiles.push(tempUri);
+        }
+        else if (file[1] === vscode.FileType.SymbolicLink) {
+            const target = fs.readlinkSync(tempUri.toString());
+            const targetStat = fs.statSync(target);
+            if (targetStat.isDirectory()) {
+                returnDir.push(tempUri);
+            }
+            else if (targetStat.isFile()) {
+                returnFiles.push(tempUri);
+            }
+            else {
+                console.error("Unknown file type for symbolic link target:", target);
+            }
+        }
+        else {
+            generalUtils.showMessage("Error! Couldn't read file " + file[0] + "!", true);
+        }
+    }
+    var finalDirs = returnDir;
+    for (const dir of returnDir) {
+        await recursiveGetFolders(dir).then(res => {
+            finalDirs = finalDirs.concat(res.folders);
+            returnFiles = returnFiles.concat(res.files);
+        });
+    }
+    var finalResponse = { folders: finalDirs, files: returnFiles };
+    return finalResponse;
+}
+function symLinkIsFile(path) {
+    var symLink = fs.statSync(path.toString());
+    return symLink.isFile();
+}
 
 
 /***/ }),
@@ -1247,25 +1285,23 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.generalUtils = void 0;
+exports.showMessage = void 0;
 const vscode = __importStar(__webpack_require__(1));
-class generalUtils {
-    /**
-     * Displays vscode's native message "pop-up".
-     *
-     * @param {string} message Message to specify on pop-up.
-     * @param {boolean} isError true -> Show error message / false -> show information message.
-     */
-    static showMessage(message, isError) {
-        if (isError) {
-            vscode.window.showErrorMessage(message);
-        }
-        else {
-            vscode.window.showInformationMessage(message);
-        }
+/**
+ * Displays vscode's native message "pop-up".
+ *
+ * @param {string} message Message to specify on pop-up.
+ * @param {boolean} isError true -> Show error message / false -> show information message.
+ */
+function showMessage(message, isError) {
+    if (isError) {
+        vscode.window.showErrorMessage(message);
+    }
+    else {
+        vscode.window.showInformationMessage(message);
     }
 }
-exports.generalUtils = generalUtils;
+exports.showMessage = showMessage;
 
 
 /***/ }),
@@ -1299,7 +1335,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.fileUtils = void 0;
 const vscode = __importStar(__webpack_require__(1));
-const general_1 = __webpack_require__(23);
+const generalUtils = __importStar(__webpack_require__(23));
 class fileUtils {
     /**
      * Creates a new file in the specified directory.
@@ -1335,7 +1371,7 @@ class fileUtils {
                 return Buffer.from(fileContent).toString();
             }
             catch (error) {
-                general_1.generalUtils.showMessage("Error reading file! " + error, true);
+                generalUtils.showMessage("Error reading file! " + error, true);
                 return undefined;
             }
         }
