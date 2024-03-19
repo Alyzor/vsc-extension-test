@@ -33,191 +33,18 @@ exports.deactivate = exports.activate = void 0;
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 const vscode = __importStar(__webpack_require__(1));
-const lorem_ipsum_1 = __webpack_require__(2);
 const displayTextSelection_1 = __webpack_require__(17);
-const showOpenFolderTree_1 = __webpack_require__(18);
+const showOpenFolderTree_1 = __webpack_require__(20);
+const folderCUD_1 = __webpack_require__(18);
+const populateArray_1 = __webpack_require__(21);
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
 function activate(context) {
-    function getDocumentInterfaceListName(documentText) {
-        var interfaceSplit = documentText.split('interface ');
-        var interfaceNameList = new Array;
-        interfaceSplit.forEach(element => {
-            var elementName = element.split('{');
-            if (elementName.length === 2) {
-                var elementDetail = elementName[1].split(',');
-                var detailList = "";
-                elementDetail.forEach(element => {
-                    if (element === elementDetail[elementDetail.length - 1]) {
-                        element = element.replace('}', "");
-                        detailList = detailList + '$(symbol-key)' + element.trim();
-                    }
-                    else {
-                        detailList = detailList + '$(symbol-key)' + element.trim() + ' / ';
-                    }
-                });
-                interfaceNameList.push({
-                    label: '$(symbol-interface)' + elementName[0],
-                    detail: detailList
-                });
-            }
-        });
-        return interfaceNameList;
-    }
-    function showMessage(message, isError) {
-        if (isError) {
-            vscode.window.showErrorMessage(message);
-        }
-        else {
-            vscode.window.showInformationMessage(message);
-        }
-    }
-    let populateArray = vscode.commands.registerCommand('tests.populateArray', async () => {
-        var openedFile = vscode.window.activeTextEditor?.document;
-        if (!openedFile) {
-            showMessage("Please open a file!", true);
-        }
-        //Checking language
-        if (openedFile?.languageId !== "typescript") {
-            showMessage("Please run the extension on a .ts file!", true);
-            return;
-        }
-        var interfaceList = getDocumentInterfaceListName(openedFile.getText());
-        var selectInterface = await vscode.window.showQuickPick(interfaceList, {
-            title: "Select an Interface",
-            canPickMany: false,
-        });
-        if (!selectInterface) {
-            return;
-        }
-        var selectQuantity = "";
-        while (selectQuantity === "") {
-            selectQuantity = await vscode.window.showInputBox({
-                title: "Amount of fields to populate... (1...25)",
-                placeHolder: "1..2..25",
-                value: "1",
-                validateInput: text => {
-                    if (/^[0-9]*$/.test(text)) {
-                        if (parseInt(text) > 25 || parseInt(text) < 1) {
-                            return "Please choose a number between 1 and 25!";
-                        }
-                        else {
-                            return "";
-                        }
-                    }
-                    else {
-                        return "Please only use numbers";
-                    }
-                }
-            });
-        }
-        if (!selectQuantity) {
-            return;
-        }
-        if (selectInterface.detail?.match("boolean")) {
-            var selectBoolValue = await vscode.window.showQuickPick([
-                {
-                    label: "$(check) True",
-                },
-                {
-                    label: "$(close) False"
-                },
-                {
-                    label: "$(ellipsis) Random"
-                }
-            ], {
-                title: "Boolean found! Do you wish to set all values to true, false or randomly assign a value?"
-            });
-        }
-        selectInterface.label = selectInterface.label.replace("$(symbol-interface)", "");
-        selectInterface.detail = selectInterface.detail.replaceAll("$(symbol-key)", "");
-        if (selectBoolValue) {
-            switch (selectBoolValue.label) {
-                case "$(close) False":
-                    selectBoolValue.label = selectBoolValue.label.replace("$(close) ", "").toLowerCase();
-                    break;
-                case "$(check) True":
-                    selectBoolValue.label = selectBoolValue.label.replace("$(check) ", "").toLowerCase();
-                    break;
-                default:
-                    selectBoolValue.label = selectBoolValue.label.replace("$(ellipsis) ", "").toLowerCase();
-                    break;
-            }
-            selectBoolValue.label.trim();
-        }
-        var tempProperties = selectInterface.detail.split('/');
-        var propertyList = [];
-        tempProperties.forEach(e => {
-            var tempProperty = e.split(":");
-            propertyList.push({ name: tempProperty[0].trim(), type: tempProperty[1].trim() });
-        });
-        if (!selectBoolValue || selectBoolValue.label === "random") {
-            generateDummyText(selectInterface.label, parseInt(selectQuantity), propertyList);
-        }
-        else {
-            generateDummyText(selectInterface.label, parseInt(selectQuantity), propertyList, Boolean(JSON.parse(selectBoolValue.label)));
-        }
-    });
+    let arrayPopulation = vscode.commands.registerCommand('tests.populateArray', async () => (0, populateArray_1.populateArray)());
     let displaySelectedText = vscode.commands.registerCommand('tests.displaySelection', () => (0, displayTextSelection_1.displayHighlightedText)());
     let showFileTree = vscode.commands.registerCommand('tests.showFileTree', () => (0, showOpenFolderTree_1.showOpenFolderTree)());
-    context.subscriptions.push(populateArray);
-    context.subscriptions.push(displaySelectedText);
-    context.subscriptions.push(showFileTree);
-    function generateDummyText(interfaceName, repeat, properties, predefinedBool) {
-        var finalText = "var dummy" + interfaceName + " = [ \r\n";
-        for (var i = 0; i < repeat; i++) {
-            finalText += "	{ \r\n";
-            properties.forEach(prop => {
-                finalText += "		" + prop.name + ": ";
-                switch (prop.type) {
-                    case "string":
-                        finalText += '"' + (0, lorem_ipsum_1.loremIpsum)() + '"';
-                        break;
-                    case "number":
-                        finalText += Math.floor(Math.random() * 200);
-                        break;
-                    case "boolean":
-                        if (predefinedBool) {
-                            finalText += predefinedBool.toString();
-                        }
-                        else {
-                            const randBool = Math.random() < 0.5;
-                            finalText += randBool;
-                        }
-                        break;
-                    default:
-                        finalText += "new " + prop.type;
-                        break;
-                }
-                if (prop === properties[properties.length - 1]) {
-                    finalText += "\r\n";
-                }
-                else {
-                    finalText += ",\r\n";
-                }
-            });
-            if (i === repeat - 1) {
-                finalText += "}";
-            }
-            else {
-                finalText += "}, \r\n";
-            }
-        }
-        finalText += "];";
-        console.log(finalText);
-        //get user's current positions
-        var userSelection = vscode.window.activeTextEditor?.selection;
-        console.log(userSelection?.active.line);
-        console.log(userSelection?.isEmpty);
-        console.log(userSelection?.start.character);
-        var editor = vscode.window.activeTextEditor;
-        editor?.edit(builder => {
-            builder.insert(userSelection.active, "\r\n" + finalText);
-        });
-        var lineAdded = userSelection.active.line + 2;
-        showMessage("Created placeholder dummy" + interfaceName + " on line " + lineAdded, false);
-        //return finalText to IDE under user's current line (newLine first, then declaration)
-    }
+    let manageWorkspaceFolders = vscode.commands.registerCommand('tests.manageFolders', async () => (0, folderCUD_1.folderCUD)());
+    context.subscriptions.push(arrayPopulation, displaySelectedText, showFileTree, manageWorkspaceFolders);
 }
 exports.activate = activate;
 // This method is called when your extension is deactivated
@@ -890,18 +717,20 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.displayHighlightedText = void 0;
 const vscode = __importStar(__webpack_require__(1));
+const general_1 = __webpack_require__(23);
+const fileManagement_1 = __webpack_require__(24);
 function displayHighlightedText() {
     var editor = vscode.window.activeTextEditor;
     if (editor) {
         if (editor.selection) {
-            vscode.window.showInformationMessage("Selected Text: " + editor.document.getText(editor.selection));
+            general_1.generalUtils.showMessage("Selected Text: " + fileManagement_1.fileUtils.readOpenedFile(editor, editor.selection), false);
         }
         else {
-            vscode.window.showInformationMessage("No text has been selected!");
+            general_1.generalUtils.showMessage("No text has been selected!", true);
         }
     }
     else {
-        vscode.window.showInformationMessage("Please open a file!");
+        general_1.generalUtils.showMessage("Please open a file!", true);
     }
 }
 exports.displayHighlightedText = displayHighlightedText;
@@ -936,74 +765,70 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.showOpenFolderTree = void 0;
+exports.folderCUD = void 0;
 const vscode = __importStar(__webpack_require__(1));
-const fs = __importStar(__webpack_require__(19));
-function showOpenFolderTree() {
-    if (vscode.workspace.workspaceFolders) {
-        var filePath = vscode.workspace.workspaceFolders[0].uri;
-        recursiveReadDirectory(filePath);
+const general_1 = __webpack_require__(23);
+const workspaceNavigation_1 = __webpack_require__(22);
+async function folderCUD() {
+    var userSelections = await vscode.window.showQuickPick([
+        {
+            label: "Create",
+            value: "create"
+        },
+        {
+            label: "Rename",
+            value: "rename"
+        },
+        {
+            label: "Delete",
+            value: "delete"
+        },
+    ], {
+        title: "Select an option...",
+        canPickMany: false
+    });
+    if (!userSelections) {
+        general_1.generalUtils.showMessage("Please select an option!", true);
+        return;
+    }
+    if (userSelections.value === "create") {
+        createNewFolder();
+    }
+    else if (userSelections.value === "rename") {
+        renameFolder();
     }
     else {
-        vscode.window.showErrorMessage("No workspace detected! Please open a folder.");
+        deleteFolder();
     }
 }
-exports.showOpenFolderTree = showOpenFolderTree;
-async function recursiveReadDirectory(dir) {
-    var currentDir = [];
-    await vscode.workspace.fs.readDirectory(dir).then(result => currentDir = result);
-    var splitDirectory = dir.toString().split('/');
-    var fileList = [];
-    var dirList = [];
-    console.log("pasta aberta: " + splitDirectory[splitDirectory.length - 1]);
-    console.log("---------------------");
-    currentDir.forEach(async (i) => {
-        var tempUri = vscode.Uri.parse(dir.toString() + "/" + i[0]);
-        switch (i[1]) {
-            case 1:
-                fileList.push(tempUri);
-                break;
-            case 2:
-                dirList.push(tempUri);
-                break;
-            case 64:
-                if (symLinkIsFile(tempUri)) {
-                    fileList.push(tempUri);
-                }
-                else {
-                    fileList.push(tempUri);
-                }
-                break;
-            default:
-                vscode.window.showErrorMessage("Error!: " + i[0] + " is an unknown file!");
-                break;
-        }
+exports.folderCUD = folderCUD;
+async function createNewFolder() {
+    let existingFolders = await workspaceNavigation_1.workspaceNavigation.getWorkspaceFolders();
+    if (existingFolders === undefined) {
+        return;
+    }
+    let folderName = await vscode.window.showInputBox({
+        title: "Select a name for your new folder.",
+        placeHolder: "New_Folder"
     });
-    for (const file of fileList) {
-        var fileText = "";
-        await readFile(file).then(text => fileText = text);
-        console.log(fileText);
+    if (folderName === undefined) {
+        return;
     }
-    ;
-    for (const dir of dirList) {
-        recursiveReadDirectory(dir);
+    else if (folderName === "") {
+        general_1.generalUtils.showMessage("Please input a name for your new folder!", true);
     }
-    ;
-    console.log("---------------------");
+    var folderList = [];
+    for (let folder of existingFolders) {
+        var folderPush = { name: "", uri: folder };
+        var tempName = folder.toString().split('/');
+        folderPush.name = tempName[tempName.length - 1];
+        folderList.push(folderPush);
+    }
+    //TODO: display folders as tree and make user select where to store new folder.
 }
-async function readFile(file) {
-    try {
-        const content = await vscode.workspace.fs.readFile(file);
-        return Buffer.from(content).toString();
-    }
-    catch (error) {
-        vscode.window.showErrorMessage("Error reading file " + file + "!\n " + error);
-        return undefined;
-    }
+function renameFolder() {
 }
-function symLinkIsFile(path) {
-    const targetStats = fs.statSync(path.toString());
-    return targetStats.isDirectory() || targetStats.isFile();
+function deleteFolder() {
 }
 
 
@@ -1012,6 +837,515 @@ function symLinkIsFile(path) {
 /***/ ((module) => {
 
 module.exports = require("fs");
+
+/***/ }),
+/* 20 */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.showOpenFolderTree = void 0;
+const workspaceNavigation_1 = __webpack_require__(22);
+function showOpenFolderTree() {
+    workspaceNavigation_1.workspaceNavigation.getWorkspaceFilesAndFolders().then(res => console.log(res));
+}
+exports.showOpenFolderTree = showOpenFolderTree;
+
+
+/***/ }),
+/* 21 */
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.populateArray = void 0;
+const vscode = __importStar(__webpack_require__(1));
+const general_1 = __webpack_require__(23);
+const lorem_ipsum_1 = __webpack_require__(2);
+async function populateArray() {
+    var openedFile = vscode.window.activeTextEditor?.document;
+    if (!openedFile) {
+        general_1.generalUtils.showMessage("Please open a file!", true);
+    }
+    //Checking language
+    if (openedFile?.languageId !== "typescript") {
+        general_1.generalUtils.showMessage("Please run the extension on a .ts file!", true);
+        return;
+    }
+    var interfaceList = getDocumentInterfaceListName(openedFile.getText());
+    var selectInterface = await vscode.window.showQuickPick(interfaceList, {
+        title: "Select an Interface",
+        canPickMany: false,
+    });
+    if (!selectInterface) {
+        return;
+    }
+    var selectQuantity = "";
+    while (selectQuantity === "") {
+        selectQuantity = await vscode.window.showInputBox({
+            title: "Amount of fields to populate... (1...25)",
+            placeHolder: "1..2..25",
+            value: "1",
+            validateInput: text => {
+                if (/^[0-9]*$/.test(text)) {
+                    if (parseInt(text) > 25 || parseInt(text) < 1) {
+                        return "Please choose a number between 1 and 25!";
+                    }
+                    else {
+                        return "";
+                    }
+                }
+                else {
+                    return "Please only use numbers";
+                }
+            }
+        });
+    }
+    if (!selectQuantity) {
+        return;
+    }
+    if (selectInterface.detail?.match("boolean")) {
+        var selectBoolValue = await vscode.window.showQuickPick([
+            {
+                label: "$(check) True",
+            },
+            {
+                label: "$(close) False"
+            },
+            {
+                label: "$(ellipsis) Random"
+            }
+        ], {
+            title: "Boolean found! Do you wish to set all values to true, false or randomly assign a value?"
+        });
+    }
+    selectInterface.label = selectInterface.label.replace("$(symbol-interface)", "");
+    selectInterface.detail = selectInterface.detail.replaceAll("$(symbol-key)", "");
+    if (selectBoolValue) {
+        switch (selectBoolValue.label) {
+            case "$(close) False":
+                selectBoolValue.label = selectBoolValue.label.replace("$(close) ", "").toLowerCase();
+                break;
+            case "$(check) True":
+                selectBoolValue.label = selectBoolValue.label.replace("$(check) ", "").toLowerCase();
+                break;
+            default:
+                selectBoolValue.label = selectBoolValue.label.replace("$(ellipsis) ", "").toLowerCase();
+                break;
+        }
+        selectBoolValue.label.trim();
+    }
+    var tempProperties = selectInterface.detail.split('/');
+    var propertyList = [];
+    tempProperties.forEach(e => {
+        var tempProperty = e.split(":");
+        propertyList.push({ name: tempProperty[0].trim(), type: tempProperty[1].trim() });
+    });
+    if (!selectBoolValue || selectBoolValue.label === "random") {
+        generateDummyText(selectInterface.label, parseInt(selectQuantity), propertyList);
+    }
+    else {
+        generateDummyText(selectInterface.label, parseInt(selectQuantity), propertyList, Boolean(JSON.parse(selectBoolValue.label)));
+    }
+}
+exports.populateArray = populateArray;
+function generateDummyText(interfaceName, repeat, properties, predefinedBool) {
+    var finalText = "var dummy" + interfaceName + " = [ \r\n";
+    for (var i = 0; i < repeat; i++) {
+        finalText += "	{ \r\n";
+        properties.forEach(prop => {
+            finalText += "		" + prop.name + ": ";
+            switch (prop.type) {
+                case "string":
+                    finalText += '"' + (0, lorem_ipsum_1.loremIpsum)() + '"';
+                    break;
+                case "number":
+                    finalText += Math.floor(Math.random() * 200);
+                    break;
+                case "boolean":
+                    if (predefinedBool) {
+                        finalText += predefinedBool.toString();
+                    }
+                    else {
+                        const randBool = Math.random() < 0.5;
+                        finalText += randBool;
+                    }
+                    break;
+                default:
+                    finalText += "new " + prop.type;
+                    break;
+            }
+            if (prop === properties[properties.length - 1]) {
+                finalText += "\r\n";
+            }
+            else {
+                finalText += ",\r\n";
+            }
+        });
+        if (i === repeat - 1) {
+            finalText += "}";
+        }
+        else {
+            finalText += "}, \r\n";
+        }
+    }
+    finalText += "];";
+    console.log(finalText);
+    //get user's current positions
+    var userSelection = vscode.window.activeTextEditor?.selection;
+    console.log(userSelection?.active.line);
+    console.log(userSelection?.isEmpty);
+    console.log(userSelection?.start.character);
+    var editor = vscode.window.activeTextEditor;
+    editor?.edit(builder => {
+        builder.insert(userSelection.active, "\r\n" + finalText);
+    });
+    var lineAdded = userSelection.active.line + 2;
+    general_1.generalUtils.showMessage("Created placeholder dummy" + interfaceName + " on line " + lineAdded, false);
+    //return finalText to IDE under user's current line (newLine first, then declaration)
+}
+function getDocumentInterfaceListName(documentText) {
+    var interfaceSplit = documentText.split('interface ');
+    var interfaceNameList = new Array;
+    interfaceSplit.forEach(element => {
+        var elementName = element.split('{');
+        if (elementName.length === 2) {
+            var elementDetail = elementName[1].split(',');
+            var detailList = "";
+            elementDetail.forEach(element => {
+                if (element === elementDetail[elementDetail.length - 1]) {
+                    element = element.replace('}', "");
+                    detailList = detailList + '$(symbol-key)' + element.trim();
+                }
+                else {
+                    detailList = detailList + '$(symbol-key)' + element.trim() + ' / ';
+                }
+            });
+            interfaceNameList.push({
+                label: '$(symbol-interface)' + elementName[0],
+                detail: detailList
+            });
+        }
+    });
+    return interfaceNameList;
+}
+
+
+/***/ }),
+/* 22 */
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.workspaceNavigation = void 0;
+const vscode = __importStar(__webpack_require__(1));
+const fs = __importStar(__webpack_require__(19));
+const general_1 = __webpack_require__(23);
+class workspaceNavigation {
+    /**
+     * Returns all files and folders present on the user's workspace in an URI format
+     *
+     * USAGE EXAMPLE:
+     * ``` let res = await getWorkspaceFilesAndFolders(); ```
+     * @returns workspaceResult (folders AND files present on the user's workspace) | undefined.
+     */
+    static async getWorkspaceFilesAndFolders() {
+        try {
+            const res = await workspaceNavigation.fetchRequestedDataFromWorkspace();
+            if (res === undefined) {
+                return undefined;
+            }
+            else {
+                return res;
+            }
+        }
+        catch (error) {
+            console.error("Error fetching workspace data:", error);
+            return undefined;
+        }
+    }
+    /**
+     * Returns an array with URI links of all files present on the current workspace.
+     *
+     * USAGE EXAMPLE:
+     * ``` let res = await getWorkspaceFiles(); ```
+     * @returns vscodde.Uri[] | undefined
+     */
+    static async getWorkspaceFiles() {
+        try {
+            const res = await workspaceNavigation.fetchRequestedDataFromWorkspace();
+            if (res === undefined) {
+                return undefined;
+            }
+            else {
+                return res.files;
+            }
+        }
+        catch (error) {
+            console.error("Error fetching workspace files:", error);
+            return undefined;
+        }
+    }
+    /**
+     * Returns an array with URI links of all folders/directories present on the current workspace.
+     *
+     * USAGE EXAMPLE:
+     * ``` let res = await getWorkspaceFolders(); ```
+     * @returns vscodde.Uri[] | undefined
+     */
+    static async getWorkspaceFolders() {
+        try {
+            const res = await workspaceNavigation.fetchRequestedDataFromWorkspace();
+            if (res === undefined) {
+                return undefined;
+            }
+            else {
+                return res.folders;
+            }
+        }
+        catch (error) {
+            console.error("Error fetching workspace files:", error);
+            return undefined;
+        }
+    }
+    static async fetchRequestedDataFromWorkspace() {
+        if (!vscode.workspace.workspaceFolders) {
+            general_1.generalUtils.showMessage("No workspace detected.", true);
+            return undefined;
+        }
+        var result = { folders: [], files: [] };
+        for (const folder of vscode.workspace.workspaceFolders) {
+            await this.recursiveGetFolders(folder.uri).then(res => {
+                result.folders.push(folder.uri);
+                result.files = result.files.concat(res.files);
+                result.folders = result.folders.concat(res.folders);
+            });
+        }
+        ;
+        return result;
+    }
+    static async recursiveGetFolders(uri) {
+        var currentDirectory = [];
+        await vscode.workspace.fs.readDirectory(uri).then(result => currentDirectory = result);
+        var returnDir = [];
+        var returnFiles = [];
+        for (const file of currentDirectory) {
+            var tempUri = vscode.Uri.parse(uri.toString() + "/" + file[0]);
+            if (file[1] === vscode.FileType.Directory) {
+                returnDir.push(tempUri);
+            }
+            else if (file[1] === vscode.FileType.File) {
+                returnFiles.push(tempUri);
+            }
+            else if (file[1] === vscode.FileType.SymbolicLink) {
+                const target = fs.readlinkSync(tempUri.toString());
+                const targetStat = fs.statSync(target);
+                if (targetStat.isDirectory()) {
+                    returnDir.push(tempUri);
+                }
+                else if (targetStat.isFile()) {
+                    returnFiles.push(tempUri);
+                }
+                else {
+                    console.error("Unknown file type for symbolic link target:", target);
+                }
+            }
+            else {
+                general_1.generalUtils.showMessage("Error! Couldn't read file " + file[0] + "!", true);
+            }
+        }
+        var finalDirs = returnDir;
+        for (const dir of returnDir) {
+            await workspaceNavigation.recursiveGetFolders(dir).then(res => {
+                finalDirs = finalDirs.concat(res.folders);
+                returnFiles = returnFiles.concat(res.files);
+            });
+        }
+        var finalResponse = { folders: finalDirs, files: returnFiles };
+        return finalResponse;
+    }
+    static symLinkIsFile(path) {
+        var symLink = fs.statSync(path.toString());
+        return symLink.isFile();
+    }
+}
+exports.workspaceNavigation = workspaceNavigation;
+
+
+/***/ }),
+/* 23 */
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.generalUtils = void 0;
+const vscode = __importStar(__webpack_require__(1));
+class generalUtils {
+    /**
+     * Displays vscode's native message "pop-up".
+     *
+     * @param {string} message Message to specify on pop-up.
+     * @param {boolean} isError true -> Show error message / false -> show information message.
+     */
+    static showMessage(message, isError) {
+        if (isError) {
+            vscode.window.showErrorMessage(message);
+        }
+        else {
+            vscode.window.showInformationMessage(message);
+        }
+    }
+}
+exports.generalUtils = generalUtils;
+
+
+/***/ }),
+/* 24 */
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.fileUtils = void 0;
+const vscode = __importStar(__webpack_require__(1));
+const general_1 = __webpack_require__(23);
+class fileUtils {
+    /**
+     * Creates a new file in the specified directory.
+     *
+     * @param {vscode.Uri} dir Loocation on user's workspace where file will be created.
+     * @param {string} fileName Specified name for the new file.
+     * @param {string} extension Specified extension for the new file.
+     */
+    static newFile(file, extension) {
+    }
+    /**
+     * Returns a string with the text written the user's currently open  file. If "selection" is defined, will return only the text that has been selected by the user.
+     *
+     * @param {string} fileName - Specified file's name.
+     * @param {vscode.Selection=} selection - If specified, returns user's selected text.
+     *
+     * @returns {string}
+     */
+    static readOpenedFile(file, selection) {
+        return file.document.getText(selection);
+    }
+    /**
+     * Returns a string with the text written on a specified file existing on the workspace.
+     *
+     * @param {vscode.Uri} uri - URI link of the directory where the file should be found.
+     *
+     * @returns {string}
+     */
+    static async readFileOnFS(uri) {
+        if (vscode.workspace.workspaceFolders) {
+            try {
+                var fileContent = await vscode.workspace.fs.readFile(uri);
+                return Buffer.from(fileContent).toString();
+            }
+            catch (error) {
+                general_1.generalUtils.showMessage("Error reading file! " + error, true);
+                return undefined;
+            }
+        }
+        else {
+            return undefined;
+        }
+    }
+}
+exports.fileUtils = fileUtils;
+
 
 /***/ })
 /******/ 	]);

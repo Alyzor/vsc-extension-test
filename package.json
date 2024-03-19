@@ -27,6 +27,11 @@
         "command": "tests.showFileTree",
         "title": "Display Solution's file tree",
         "category": "Tests"
+      },
+      {
+        "command": "tests.manageFolders",
+        "title": "Manage Workspace Folders",
+        "category": "Tests"
       }
     ]
   },
