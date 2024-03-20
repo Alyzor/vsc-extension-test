@@ -9,7 +9,7 @@ import * as generalUtils from './general';
      * @param {string} extension Specified extension for the new file.
      */
     export function newFile(file:vscode.TextEditor, extension:string){
-
+        //TODO: Create new file
     }
 
     /**
