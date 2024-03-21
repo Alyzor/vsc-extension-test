@@ -49,7 +49,11 @@ interface folderDetails{
 }
 
 async function createNewFolder(){
-    let folderList = await getFolderListAsQuickPickItemList();
+    let folderUriList = await workspaceNavigation.getWorkspaceFolders();
+    if(!folderUriList){
+        return;
+    }
+    let folderList = await workspaceNavigation.getItemListAsQuickPickItemList(folderUriList);
 
     if(folderList.length === 0){
         return;
@@ -85,7 +89,11 @@ async function createNewFolder(){
 
 
 async function renameFolder(){
-    var folderList = await getFolderListAsQuickPickItemList();
+    let folderUriList = await workspaceNavigation.getWorkspaceFolders();
+    if(!folderUriList){
+        return;
+    }
+    let folderList = await workspaceNavigation.getItemListAsQuickPickItemList(folderUriList);
 
     folderList.splice(0,1);
 
@@ -122,7 +130,11 @@ async function renameFolder(){
 }
 
 async function deleteFolder(){
-    var folderList = await getFolderListAsQuickPickItemList();
+    let folderUriList = await workspaceNavigation.getWorkspaceFolders();
+    if(!folderUriList){
+        return;
+    }
+    let folderList = await workspaceNavigation.getItemListAsQuickPickItemList(folderUriList);
 
     folderList.splice(0,1);
 
@@ -156,41 +168,4 @@ async function deleteFolder(){
     }
 
 
-}
-
-async function getFolderListAsQuickPickItemList():Promise<vscode.QuickPickItem[]>{
-    let existingFolders = await workspaceNavigation.getWorkspaceFolders();
-
-    if(existingFolders === undefined){
-         return []; 
-    }
-
-    var folderList:folderDetails[] = []; 
-
-    for(let folder of existingFolders){
-        var folderPush:folderDetails = {name: "", uri: folder};
-        var tempName = folder.toString().split('/');
-        folderPush.name = tempName[tempName.length-1];
-        folderList.push(folderPush);
-    }
-    folderList = folderList.sort((a, b) => (a.uri.toString() < b.uri.toString() ? -1 : 1));
-    return organizeFolderInPickItem(folderList);
-}
-
-function organizeFolderInPickItem(folderList:folderDetails[]){
-    var folderQuickPickList:vscode.QuickPickItem[] = [];
-    for(let folder of folderList){
-        if(folder === folderList[0]){
-            folderQuickPickList.push({
-                label:'ROOT: ' + folder.name,
-                detail:folder.uri.toString()
-            });
-        }else{
-            folderQuickPickList.push({
-                label:folder.name,
-                detail:folder.uri.toString()
-            });
-        }
-    }
-    return folderQuickPickList;
 }

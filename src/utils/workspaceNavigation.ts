@@ -53,8 +53,6 @@ interface workspaceResult {
         }
     }
 
-    //TOO
-
     /**
      * Returns an array with URI links of all folders/directories present on the current workspace.
      * 
@@ -140,4 +138,43 @@ interface workspaceResult {
         var symLink = fs.statSync(path.toString());
 
         return symLink.isFile();
+    }
+    interface folderDetails{
+        name: string,
+        uri: vscode.Uri
+    }
+    export async function getItemListAsQuickPickItemList(existingItems:vscode.Uri[]):Promise<vscode.QuickPickItem[]>{
+    
+        if(existingItems === undefined){
+             return []; 
+        }
+    
+        var folderList:folderDetails[] = []; 
+    
+        for(let folder of existingItems){
+            var folderPush:folderDetails = {name: "", uri: folder};
+            var tempName = folder.toString().split('/');
+            folderPush.name = tempName[tempName.length-1];
+            folderList.push(folderPush);
+        }
+        folderList = folderList.sort((a, b) => (a.uri.toString() < b.uri.toString() ? -1 : 1));
+        return organizeItemsInPickItem(folderList);
+    }
+    
+    function organizeItemsInPickItem(folderList:folderDetails[]){
+        var folderQuickPickList:vscode.QuickPickItem[] = [];
+        for(let folder of folderList){
+            if(folder === folderList[0]){
+                folderQuickPickList.push({
+                    label:'ROOT: ' + folder.name,
+                    detail:folder.uri.toString()
+                });
+            }else{
+                folderQuickPickList.push({
+                    label:folder.name,
+                    detail:folder.uri.toString()
+                });
+            }
+        }
+        return folderQuickPickList;
     }

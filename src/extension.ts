@@ -4,6 +4,7 @@ import * as vscode from 'vscode';
 import { displayHighlightedText } from './extensions/displayTextSelection';
 import { showOpenFolderTree } from './extensions/showOpenFolderTree';
 import { folderCUD } from './extensions/folderCUD';
+import { fileCUD } from './extensions/fileCUD';
 import { populateArray } from './extensions/populateArray'; 
 
 // This method is called when your extension is activated
@@ -18,11 +19,14 @@ export function activate(context: vscode.ExtensionContext) {
 
 	let manageWorkspaceFolders = vscode.commands.registerCommand('tests.manageFolders', async ()=> folderCUD());
 	
+	let manageWorkspaceFiles = vscode.commands.registerCommand('tests.manageFiles', async ()=> fileCUD());
+
 	context.subscriptions.push(
 		arrayPopulation, 
 		displaySelectedText,
 		showFileTree, 
-		manageWorkspaceFolders
+		manageWorkspaceFolders,
+		manageWorkspaceFiles
 	);
 }
 

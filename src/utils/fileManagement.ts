@@ -4,14 +4,35 @@ import * as generalUtils from './general';
     /**
      * Creates a new file in the specified directory.
      * 
-     * @param {vscode.Uri} dir Loocation on user's workspace where file will be created.
-     * @param {string} fileName Specified name for the new file.
-     * @param {string} extension Specified extension for the new file.
+     * @param {vscode.Uri} newFile Previously created URI 
+     * that points to the file's desired location.
      */
-    export function newFile(file:vscode.TextEditor, extension:string){
-        //TODO: Create new file
+    export function newFile(newFile:vscode.Uri){
+            try{
+                vscode.workspace.fs.writeFile(newFile, Uint8Array.from([]));
+                return true;
+            }catch(err){
+                return err;
+            }
     }
 
+    export function renameFile(oldName:vscode.Uri, newName:vscode.Uri){
+        try{
+            vscode.workspace.fs.rename(oldName,newName);
+            return true;
+        }catch(err){
+            return err;
+        }
+    }
+
+    export function deleteFile(uri: vscode.Uri){
+        try{
+            vscode.workspace.fs.delete(uri);
+            return true;
+        }catch(err){
+            return err;
+        }
+    }
     /**
      * Returns a string with the text written the user's currently open  file. If "selection" is defined, will return only the text that has been selected by the user. 
      * 

@@ -32,6 +32,11 @@
         "command": "tests.manageFolders",
         "title": "Manage Workspace Folders",
         "category": "Tests"
+      },
+      {
+        "command": "tests.manageFiles",
+        "title": "Manage Workspace Files",
+        "category": "Tests"
       }
     ]
   },
