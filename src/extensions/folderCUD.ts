@@ -76,15 +76,9 @@ async function createNewFolder(){
         title:"Select where to create your new folder: ", 
     placeHolder:"Search here if there are too many folders!"}
     );
-    var creationState = await folderManagement.createFolder(selectedFolder, folderName);
-
-    if(creationState === undefined){
-        generalUtils.showMessage("No folder selected!", true);
-    }else if(creationState === false){
-        generalUtils.showMessage("Folder already exists!", true);
-    }else{
-        generalUtils.showMessage("Folder created successfully!", false);
-    }
+    let newPath = vscode.Uri.parse(selectedFolder!.detail! + '/' + folderName);
+    
+    folderManagement.createFolder(newPath).catch(()=> generalUtils.showMessage("Folder already exists!", true));
 }
 
 
@@ -120,13 +114,11 @@ async function renameFolder(){
         generalUtils.showMessage("Please input a name for your new folder!", true);
         return;
     }
-    let renameState = folderManagement.renameFolder(selectedFolder, newFolderName);
+    
+    let oldPath:vscode.Uri = vscode.Uri.parse(selectedFolder.detail!);
+    let newPath:vscode.Uri = vscode.Uri.parse(selectedFolder.detail!.replace(selectedFolder.label, newFolderName));
 
-    if(renameState === undefined){
-        generalUtils.showMessage("Renamed folder " + selectedFolder.label +" to "+ newFolderName +"!", false);
-    }else{
-        generalUtils.showMessage("Error! " + renameState, true);
-    }
+    folderManagement.renameFolder(oldPath, newPath).catch(()=> generalUtils.showMessage("Error! File not found!", true));
 }
 
 async function deleteFolder(){
@@ -156,7 +148,15 @@ async function deleteFolder(){
     });
 
     if(willDeleteFolder === selectedFolder.label){
-        let deletionState = folderManagement.deleteFolder(selectedFolder);
+
+        folderManagement.deleteFolder(vscode.Uri.parse(selectedFolder!.detail!)).catch((err)=>{
+            if(err === vscode.FileSystemError.FileNotFound){
+                generalUtils.showMessage("Error! Folder does not exist.", true);
+            }else{
+                generalUtils.showMessage("Error! Not a folder.", true);
+            }
+        });
+        let deletionState = folderManagement.deleteFolder(vscode.Uri.parse(selectedFolder.detail!));
         if(deletionState === undefined){
             generalUtils.showMessage("Folder " + selectedFolder.label! + " deleted successfully!",false);
         }else{

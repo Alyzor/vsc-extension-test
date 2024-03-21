@@ -196,33 +196,44 @@ const generalUtils = __importStar(__webpack_require__(3));
  * @param {vscode.Uri} newFile Previously created URI
  * that points to the file's desired location.
  */
-function newFile(newFile) {
-    try {
-        vscode.workspace.fs.writeFile(newFile, Uint8Array.from([]));
-        return true;
+async function newFile(newFile) {
+    let fs = vscode.workspace.fs;
+    let fsError = vscode.FileSystemError;
+    let fStat = await fs.stat(newFile);
+    if (!fStat) {
+        fs.createDirectory(newFile);
     }
-    catch (err) {
-        return err;
+    else {
+        throw fsError.FileExists();
     }
 }
 exports.newFile = newFile;
-function renameFile(oldName, newName) {
-    try {
-        vscode.workspace.fs.rename(oldName, newName);
-        return true;
+async function renameFile(oldName, newName) {
+    let fs = vscode.workspace.fs;
+    let fsError = vscode.FileSystemError;
+    let fStat = await fs.stat(oldName);
+    if (fStat) {
+        fs.rename(oldName, newName);
     }
-    catch (err) {
-        return err;
+    else {
+        throw fsError.FileNotFound();
     }
 }
 exports.renameFile = renameFile;
-function deleteFile(uri) {
-    try {
-        vscode.workspace.fs.delete(uri);
-        return true;
+async function deleteFile(uri) {
+    let fs = vscode.workspace.fs;
+    let fsError = vscode.FileSystemError;
+    let fStat = await fs.stat(uri);
+    if (fStat) {
+        if (fStat.type !== vscode.FileType.File) {
+            throw fsError.FileIsADirectory();
+        }
+        else {
+            fs.delete(uri);
+        }
     }
-    catch (err) {
-        return err;
+    else {
+        throw fsError.FileNotFound();
     }
 }
 exports.deleteFile = deleteFile;
@@ -592,16 +603,8 @@ async function createNewFolder() {
         title: "Select where to create your new folder: ",
         placeHolder: "Search here if there are too many folders!"
     });
-    var creationState = await folderManagement.createFolder(selectedFolder, folderName);
-    if (creationState === undefined) {
-        generalUtils.showMessage("No folder selected!", true);
-    }
-    else if (creationState === false) {
-        generalUtils.showMessage("Folder already exists!", true);
-    }
-    else {
-        generalUtils.showMessage("Folder created successfully!", false);
-    }
+    let newPath = vscode.Uri.parse(selectedFolder.detail + '/' + folderName);
+    folderManagement.createFolder(newPath).catch(() => generalUtils.showMessage("Folder already exists!", true));
 }
 async function renameFolder() {
     let folderUriList = await workspaceNavigation.getWorkspaceFolders();
@@ -626,13 +629,9 @@ async function renameFolder() {
         generalUtils.showMessage("Please input a name for your new folder!", true);
         return;
     }
-    let renameState = folderManagement.renameFolder(selectedFolder, newFolderName);
-    if (renameState === undefined) {
-        generalUtils.showMessage("Renamed folder " + selectedFolder.label + " to " + newFolderName + "!", false);
-    }
-    else {
-        generalUtils.showMessage("Error! " + renameState, true);
-    }
+    let oldPath = vscode.Uri.parse(selectedFolder.detail);
+    let newPath = vscode.Uri.parse(selectedFolder.detail.replace(selectedFolder.label, newFolderName));
+    folderManagement.renameFolder(oldPath, newPath).catch(() => generalUtils.showMessage("Error! File not found!", true));
 }
 async function deleteFolder() {
     let folderUriList = await workspaceNavigation.getWorkspaceFolders();
@@ -654,7 +653,15 @@ async function deleteFolder() {
         placeHolder: selectedFolder.label
     });
     if (willDeleteFolder === selectedFolder.label) {
-        let deletionState = folderManagement.deleteFolder(selectedFolder);
+        folderManagement.deleteFolder(vscode.Uri.parse(selectedFolder.detail)).catch((err) => {
+            if (err === vscode.FileSystemError.FileNotFound) {
+                generalUtils.showMessage("Error! Folder does not exist.", true);
+            }
+            else {
+                generalUtils.showMessage("Error! Not a folder.", true);
+            }
+        });
+        let deletionState = folderManagement.deleteFolder(vscode.Uri.parse(selectedFolder.detail));
         if (deletionState === undefined) {
             generalUtils.showMessage("Folder " + selectedFolder.label + " deleted successfully!", false);
         }
@@ -700,42 +707,44 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.deleteFolder = exports.renameFolder = exports.createFolder = void 0;
 const vscode = __importStar(__webpack_require__(1));
-async function createFolder(selectedFolder, folderName) {
-    if (selectedFolder !== undefined) {
-        var folderURI = vscode.Uri.parse(selectedFolder?.detail + '/' + folderName);
+async function createFolder(folderURI) {
+    let fs = vscode.workspace.fs;
+    let fsError = vscode.FileSystemError;
+    let fStat = await fs.stat(folderURI);
+    if (!fStat) {
+        fs.createDirectory(folderURI);
     }
     else {
-        return undefined;
-    }
-    try {
-        await vscode.workspace.fs.stat(folderURI);
-        return false;
-    }
-    catch (err) {
-        vscode.workspace.fs.createDirectory(folderURI);
-        return true;
+        throw fsError.FileExists();
     }
 }
 exports.createFolder = createFolder;
-function renameFolder(selectedFolder, newFolderName) {
-    let oldPath = vscode.Uri.parse(selectedFolder.detail);
-    let newPath = vscode.Uri.parse(selectedFolder.detail.replace(selectedFolder.label, newFolderName));
-    try {
-        vscode.workspace.fs.rename(oldPath, newPath);
-        return;
+async function renameFolder(oldPath, newPath) {
+    let fs = vscode.workspace.fs;
+    let fsError = vscode.FileSystemError;
+    let fStat = await fs.stat(oldPath);
+    if (!fStat) {
+        throw fsError.FileNotFound();
     }
-    catch (err) {
-        return err;
+    else {
+        fs.rename(oldPath, newPath);
     }
 }
 exports.renameFolder = renameFolder;
-function deleteFolder(selectedFolder) {
-    try {
-        vscode.workspace.fs.delete(vscode.Uri.parse(selectedFolder.detail));
-        return;
+async function deleteFolder(folderURI) {
+    let fs = vscode.workspace.fs;
+    let fsError = vscode.FileSystemError;
+    let fStat = await fs.stat(folderURI);
+    if (!fStat) {
+        throw fsError.FileNotFound();
     }
-    catch (err) {
-        return err;
+    else {
+        if (fStat.type !== vscode.FileType.Directory) {
+            throw fsError.FileNotADirectory();
+        }
+        else {
+            fs.delete(folderURI);
+        }
     }
 }
 exports.deleteFolder = deleteFolder;
@@ -833,16 +842,7 @@ async function createNewFile() {
         return;
     }
     var newFile = vscode.Uri.parse(selectedFolder.detail.toString() + '/' + fileName);
-    let creationStatus = fileManagement.newFile(newFile);
-    if (creationStatus === true) {
-        generalUtils.showMessage("File created successfully!", false);
-    }
-    else if (creationStatus === false) {
-        generalUtils.showMessage("File already exists!", true);
-    }
-    else {
-        generalUtils.showMessage("Error! " + creationStatus, true);
-    }
+    fileManagement.newFile(newFile).catch(() => generalUtils.showMessage("File already exists!", true));
 }
 async function renameFile() {
     let fileUriList = await workspaceNavigation.getWorkspaceFiles();
@@ -867,13 +867,7 @@ async function renameFile() {
     var fileLocation = selectedFile.detail?.split("/").slice(0, -1).join("/") + "/";
     console.log(fileLocation);
     let fileUri = vscode.Uri.parse(fileLocation + newFileName);
-    let renameState = fileManagement.renameFile(vscode.Uri.parse(selectedFile.detail), fileUri);
-    if (renameState === true) {
-        generalUtils.showMessage("File renamed successfully!", false);
-    }
-    else {
-        generalUtils.showMessage("Error!" + renameState, true);
-    }
+    fileManagement.renameFile(vscode.Uri.parse(selectedFile.detail), fileUri).catch(() => generalUtils.showMessage("Error! File not found.", true));
 }
 async function deleteFile() {
     let fileUriList = await workspaceNavigation.getWorkspaceFiles();
@@ -896,13 +890,14 @@ async function deleteFile() {
         return;
     }
     let fileUri = vscode.Uri.parse(selectedFile.detail.toString() + "/" + newFileName);
-    let deleteState = fileManagement.deleteFile(fileUri);
-    if (deleteState === true) {
-        generalUtils.showMessage("File renamed successfully!", false);
-    }
-    else {
-        generalUtils.showMessage("Error!" + deleteState, true);
-    }
+    fileManagement.deleteFile(fileUri).catch((err) => {
+        if (err === vscode.FileSystemError.FileIsADirectory) {
+            generalUtils.showMessage("Error! The selected file is a folder.", true);
+        }
+        else {
+            generalUtils.showMessage("Error! File not found.", true);
+        }
+    });
 }
 
 

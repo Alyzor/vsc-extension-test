@@ -1,40 +1,41 @@
 import * as vscode from 'vscode';
 
-export async function createFolder(selectedFolder: vscode.QuickPickItem |undefined ,folderName:string):Promise<boolean | undefined>{
-    if(selectedFolder !== undefined){
-        var folderURI = vscode.Uri.parse(selectedFolder?.detail! + '/' + folderName);
-    }else{
-        return undefined;
-    }
+export async function createFolder(folderURI:vscode.Uri){
+    let fs = vscode.workspace.fs;
+    let fsError = vscode.FileSystemError;
+    let fStat = await fs.stat(folderURI);
     
-
-    try{
-        await vscode.workspace.fs.stat(folderURI);
-        return false;
-    }catch(err){
-        vscode.workspace.fs.createDirectory(folderURI);
-        return true;
+    if(!fStat){
+        fs.createDirectory(folderURI);
+    }else{
+        throw fsError.FileExists();
     }
 }
 
-export function renameFolder(selectedFolder: vscode.QuickPickItem, newFolderName:string){
-
-    let oldPath:vscode.Uri = vscode.Uri.parse(selectedFolder.detail!);
-    let newPath:vscode.Uri = vscode.Uri.parse(selectedFolder.detail!.replace(selectedFolder.label, newFolderName));
-
-    try{
-        vscode.workspace.fs.rename(oldPath, newPath);
-        return;
-    }catch(err){
-        return err;
+export async function renameFolder(oldPath: vscode.Uri, newPath:vscode.Uri){
+    let fs = vscode.workspace.fs;
+    let fsError = vscode.FileSystemError;
+    let fStat = await fs.stat(oldPath);
+    
+    if(!fStat){
+        throw fsError.FileNotFound();
+    }else{
+        fs.rename(oldPath, newPath);
     }
 }
 
-export function deleteFolder(selectedFolder:vscode.QuickPickItem){
-    try{
-        vscode.workspace.fs.delete(vscode.Uri.parse(selectedFolder.detail!));
-        return;
-    }catch(err){
-        return err;
+export async function deleteFolder(folderURI:vscode.Uri){
+    let fs = vscode.workspace.fs;
+    let fsError = vscode.FileSystemError;
+    let fStat = await fs.stat(folderURI);
+    
+    if(!fStat){
+        throw fsError.FileNotFound();
+    }else{
+        if(fStat.type !== vscode.FileType.Directory){
+            throw fsError.FileNotADirectory();
+        }else{
+            fs.delete(folderURI);
+        }
     }
 }

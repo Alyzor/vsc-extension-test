@@ -7,30 +7,43 @@ import * as generalUtils from './general';
      * @param {vscode.Uri} newFile Previously created URI 
      * that points to the file's desired location.
      */
-    export function newFile(newFile:vscode.Uri){
-            try{
-                vscode.workspace.fs.writeFile(newFile, Uint8Array.from([]));
-                return true;
-            }catch(err){
-                return err;
-            }
-    }
-
-    export function renameFile(oldName:vscode.Uri, newName:vscode.Uri){
-        try{
-            vscode.workspace.fs.rename(oldName,newName);
-            return true;
-        }catch(err){
-            return err;
+    export async function newFile(newFile:vscode.Uri){
+        let fs = vscode.workspace.fs;
+        let fsError = vscode.FileSystemError;
+        let fStat = await fs.stat(newFile);
+        
+        if(!fStat){
+            fs.createDirectory(newFile);
+        }else{
+            throw fsError.FileExists();
         }
     }
 
-    export function deleteFile(uri: vscode.Uri){
-        try{
-            vscode.workspace.fs.delete(uri);
-            return true;
-        }catch(err){
-            return err;
+    export async function renameFile(oldName:vscode.Uri, newName:vscode.Uri){
+        let fs = vscode.workspace.fs;
+        let fsError = vscode.FileSystemError;
+        let fStat = await fs.stat(oldName);
+        
+        if(fStat){
+            fs.rename(oldName, newName);
+        }else{
+            throw fsError.FileNotFound();
+        }
+    }
+
+    export async function deleteFile(uri: vscode.Uri){
+        let fs = vscode.workspace.fs;
+        let fsError = vscode.FileSystemError;
+        let fStat = await fs.stat(uri);
+        
+        if(fStat){
+            if(fStat.type !== vscode.FileType.File){
+                throw fsError.FileIsADirectory();
+            }else{
+                fs.delete(uri);
+            }
+        }else{
+            throw fsError.FileNotFound();
         }
     }
     /**

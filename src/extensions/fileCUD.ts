@@ -76,15 +76,7 @@ async function createNewFile(){
 
     var newFile = vscode.Uri.parse(selectedFolder.detail!.toString() + '/' + fileName);
 
-    let creationStatus = fileManagement.newFile(newFile);
-
-    if(creationStatus === true){
-        generalUtils.showMessage("File created successfully!", false);
-    }else if(creationStatus === false){
-        generalUtils.showMessage("File already exists!", true);
-    }else{
-        generalUtils.showMessage("Error! " + creationStatus, true);
-    }
+    fileManagement.newFile(newFile).catch(()=> generalUtils.showMessage("File already exists!", true));
 }
 
 async function renameFile(){
@@ -111,13 +103,8 @@ async function renameFile(){
     var fileLocation = selectedFile.detail?.split("/").slice(0, -1).join("/")+"/";
     console.log(fileLocation);
     let fileUri = vscode.Uri.parse(fileLocation! + newFileName);
-    let renameState = fileManagement.renameFile(vscode.Uri.parse(selectedFile.detail!), fileUri);
-    
-    if(renameState === true){
-        generalUtils.showMessage("File renamed successfully!", false);
-    }else{
-        generalUtils.showMessage("Error!" + renameState, true);
-    }
+
+    fileManagement.renameFile(vscode.Uri.parse(selectedFile.detail!), fileUri).catch(()=> generalUtils.showMessage("Error! File not found.", true));
 }
 
 async function deleteFile(){
@@ -142,11 +129,12 @@ async function deleteFile(){
     if(!newFileName || newFileName !== selectedFile.label) { return; }
     
     let fileUri = vscode.Uri.parse(selectedFile.detail!.toString() + "/" + newFileName);
-    let deleteState = fileManagement.deleteFile(fileUri);
 
-    if(deleteState === true){
-        generalUtils.showMessage("File renamed successfully!", false);
-    }else{
-        generalUtils.showMessage("Error!" + deleteState, true);
-    }
+    fileManagement.deleteFile(fileUri).catch((err)=>{
+        if(err === vscode.FileSystemError.FileIsADirectory){
+            generalUtils.showMessage("Error! The selected file is a folder." , true);
+        }else{
+            generalUtils.showMessage("Error! File not found." , true);
+        }
+    });
 }
