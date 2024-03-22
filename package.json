@@ -67,6 +67,7 @@
   },
   "dependencies": {
     "lorem-ipsum": "^2.0.8",
+    "openai": "^4.0.0",
     "typelorem": "^0.0.11"
   }
 }
