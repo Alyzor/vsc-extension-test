@@ -51,7 +51,7 @@ async function createNewFile(){
     }
 
     let folderList = await workspaceNavigation.getItemListAsQuickPickItemList(folderUriList);
-
+    folderList[0].label = "ROOT: " + folderList[0].label;
     if(!folderList){ return; }
     let selectedFolder = await vscode.window.showQuickPick(
         folderList, 
@@ -76,7 +76,9 @@ async function createNewFile(){
 
     var newFile = vscode.Uri.parse(selectedFolder.detail!.toString() + '/' + fileName);
 
-    fileManagement.newFile(newFile).catch(()=> generalUtils.showMessage("File already exists!", true));
+    fileManagement.newFile(newFile)
+    .catch(()=> generalUtils.showMessage("File already exists!", true))
+    .then(()=>generalUtils.showMessage("File created successfully!", false));
 }
 
 async function renameFile(){
@@ -104,7 +106,9 @@ async function renameFile(){
     console.log(fileLocation);
     let fileUri = vscode.Uri.parse(fileLocation! + newFileName);
 
-    fileManagement.renameFile(vscode.Uri.parse(selectedFile.detail!), fileUri).catch(()=> generalUtils.showMessage("Error! File not found.", true));
+    fileManagement.renameFile(vscode.Uri.parse(selectedFile.detail!), fileUri)
+    .catch(()=> generalUtils.showMessage("Error! File not found.", true))
+    .then(()=>generalUtils.showMessage("File deleted successfully!", false));
 }
 
 async function deleteFile(){
@@ -113,7 +117,6 @@ async function deleteFile(){
     let fileList = await workspaceNavigation.getItemListAsQuickPickItemList(fileUriList);
 
     if(!fileList){ return; }
-
     let selectedFile = await vscode.window.showQuickPick(
         fileList,
         {
@@ -123,12 +126,11 @@ async function deleteFile(){
     );
     
     if(!selectedFile) { return; }
-
     let newFileName = await vscode.window.showInputBox({title:"Please confirm the name AND extension of the file you wish to delete...", placeHolder:selectedFile.label});
     
     if(!newFileName || newFileName !== selectedFile.label) { return; }
     
-    let fileUri = vscode.Uri.parse(selectedFile.detail!.toString() + "/" + newFileName);
+    let fileUri = vscode.Uri.parse(selectedFile.detail!.toString());
 
     fileManagement.deleteFile(fileUri).catch((err)=>{
         if(err === vscode.FileSystemError.FileIsADirectory){
@@ -136,5 +138,5 @@ async function deleteFile(){
         }else{
             generalUtils.showMessage("Error! File not found." , true);
         }
-    });
+    }).then(()=>generalUtils.showMessage("File deleted successfully!", false));
 }

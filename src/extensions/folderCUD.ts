@@ -54,6 +54,7 @@ async function createNewFolder(){
         return;
     }
     let folderList = await workspaceNavigation.getItemListAsQuickPickItemList(folderUriList);
+    folderList[0].label = "ROOT: " + folderList[0].label;
 
     if(folderList.length === 0){
         return;
@@ -78,7 +79,9 @@ async function createNewFolder(){
     );
     let newPath = vscode.Uri.parse(selectedFolder!.detail! + '/' + folderName);
     
-    folderManagement.createFolder(newPath).catch(()=> generalUtils.showMessage("Folder already exists!", true));
+    folderManagement.createFolder(newPath)
+    .catch(()=> generalUtils.showMessage("Folder already exists!", true))
+    .then(()=>generalUtils.showMessage("Folder created successfully!", false));
 }
 
 
@@ -118,7 +121,9 @@ async function renameFolder(){
     let oldPath:vscode.Uri = vscode.Uri.parse(selectedFolder.detail!);
     let newPath:vscode.Uri = vscode.Uri.parse(selectedFolder.detail!.replace(selectedFolder.label, newFolderName));
 
-    folderManagement.renameFolder(oldPath, newPath).catch(()=> generalUtils.showMessage("Error! File not found!", true));
+    folderManagement.renameFolder(oldPath, newPath)
+    .catch(()=> generalUtils.showMessage("Error! File not found!", true))
+    .then(()=>generalUtils.showMessage("Folder renamed successfully!", false));
 }
 
 async function deleteFolder(){
@@ -155,13 +160,9 @@ async function deleteFolder(){
             }else{
                 generalUtils.showMessage("Error! Not a folder.", true);
             }
-        });
-        let deletionState = folderManagement.deleteFolder(vscode.Uri.parse(selectedFolder.detail!));
-        if(deletionState === undefined){
-            generalUtils.showMessage("Folder " + selectedFolder.label! + " deleted successfully!",false);
-        }else{
-            generalUtils.showMessage("Error! "+ deletionState,true);
-        }
+        })
+        .then(()=>generalUtils.showMessage("Folder deleted successfully!", false));
+
     }else{
         generalUtils.showMessage("The name you wrote doesn't match with the folder's name!", true);
         return;

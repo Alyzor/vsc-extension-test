@@ -2,10 +2,13 @@ import * as vscode from 'vscode';
 import * as generalUtils from './general';
 
     /**
-     * Creates a new file in the specified directory.
+     * Creates a new file.
+     * newFile can be created like so:
      * 
-     * @param {vscode.Uri} newFile Previously created URI 
-     * that points to the file's desired location.
+     * ``` vscode.Uri.parse(parentFolderURI.toString() + "newFileName");``` 
+     * @param newFile URI containing the file's destination with the new name.
+     * 
+     * @throws vscode.FileSystemError.FileExists - In case the user's directory already has a file with the same name as the new one.
      */
     export async function newFile(newFile:vscode.Uri){
         let fs = vscode.workspace.fs;
@@ -19,6 +22,16 @@ import * as generalUtils from './general';
         }
     }
 
+    /** 
+    * Renames a file.
+    * newPath can be created like so:
+    * 
+    * ``` vscode.Uri.parse(oldURI.toString() + "newName!");``` 
+    * @param oldName URI fetched from workspace's FS. 
+    * @param newName URI created with the user's new file name, without the old one.
+    * 
+    * @throws vscode.FileSystemError.FileNotFound - In case the user's file does not exist anymore.
+    */
     export async function renameFile(oldName:vscode.Uri, newName:vscode.Uri){
         let fs = vscode.workspace.fs;
         let fsError = vscode.FileSystemError;
@@ -31,11 +44,20 @@ import * as generalUtils from './general';
         }
     }
 
+    /**
+     * Deletes a file.
+     * 
+     * @param uri URI containing the file's destination.
+     * 
+     * @throws vscode.FileSystemError.FileNotFound - In case the user's directory doesn't have the specified file.
+     * @throws vscode.FileSystemError.FileIsADirectory - In case the URI doesn't point to a file.
+     * 
+     */
     export async function deleteFile(uri: vscode.Uri){
         let fs = vscode.workspace.fs;
         let fsError = vscode.FileSystemError;
         let fStat = await fs.stat(uri);
-        
+       console.log(fStat); 
         if(fStat){
             if(fStat.type !== vscode.FileType.File){
                 throw fsError.FileIsADirectory();

@@ -161,20 +161,20 @@ interface workspaceResult {
         return organizeItemsInPickItem(folderList);
     }
     
-    function organizeItemsInPickItem(folderList:folderDetails[]){
-        var folderQuickPickList:vscode.QuickPickItem[] = [];
-        for(let folder of folderList){
-            if(folder === folderList[0]){
-                folderQuickPickList.push({
-                    label:'ROOT: ' + folder.name,
-                    detail:folder.uri.toString()
+    function organizeItemsInPickItem(itemList:folderDetails[]){
+        var itemQuickPickList:vscode.QuickPickItem[] = [];
+        for(let item of itemList){
+            if(item === itemList[0]){
+                itemQuickPickList.push({
+                    label:item.name,
+                    detail:item.uri.toString()
                 });
             }else{
-                folderQuickPickList.push({
-                    label:folder.name,
-                    detail:folder.uri.toString()
+                itemQuickPickList.push({
+                    label:item.name,
+                    detail:item.uri.toString()
                 });
             }
         }
-        return folderQuickPickList;
+        return itemQuickPickList;
     }
