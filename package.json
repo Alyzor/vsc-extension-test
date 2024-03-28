@@ -12,6 +12,24 @@
   "activationEvents": [],
   "main": "./dist/extension.js",
   "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "buddyChat",
+          "title": "Coding Buddy",
+          "icon": "media/buddyChat.png"
+        }
+      ]
+    },
+    "views": {
+      "buddyChat": [
+        {
+          "type": "webview",
+          "id": "tests.buddyWebview",
+          "name": "Chat"
+        }
+      ]
+    },
     "commands": [
       {
         "command": "tests.displaySelection",
@@ -36,6 +54,11 @@
       {
         "command": "tests.manageFiles",
         "title": "Manage Workspace Files",
+        "category": "Tests"
+      },
+      {
+        "command": "tests.chatGPT",
+        "title": "Test OpenAI API",
         "category": "Tests"
       }
     ]
@@ -66,6 +89,7 @@
     "webpack-cli": "^5.1.4"
   },
   "dependencies": {
+    "@vscode/codicons": "^0.0.35",
     "lorem-ipsum": "^2.0.8",
     "openai": "^4.0.0",
     "typelorem": "^0.0.11"

@@ -1,0 +1,53 @@
+
+
+.container{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+}
+
+.input-box{
+    position:absolute;
+    bottom:0;
+    width:calc(100% - 2rem);
+    padding:1rem;
+    border-top:1px solid var(--vscode-activityBar-dropBorder);
+}
+
+
+.input-wrapper{
+    display:flex;
+    flex-direction:row;
+    align-items:center;
+    border:1px solid var(--vscode-activityBar-dropBorder);
+}
+
+.input-box input{
+    color:var(--vscode-foreground);
+    width:100%;
+    padding:0.5rem;
+    border:0;
+    background-color: var(--vscode-activityBar-background);
+}
+
+.chatbox{
+    width:100%;
+    height:calc(100% - 4rem);
+    overflow-y:auto;
+    padding:1rem;
+}
+
+.input-button{
+    background-color: var(--vscode-activityBar-background);
+    padding:0.5rem;
+    border-left:1px solid var(--vscode-activityBar-dropBorder);
+}
+
+
+.user-chat-box{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    margin-bottom:1rem;
+    border:1px, 0px, 1px, 0px solid var(--vscode-activityBar-dropBorder);
+}
