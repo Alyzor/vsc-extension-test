@@ -6,7 +6,7 @@ import { showOpenFolderTree } from './extensions/showOpenFolderTree';
 import { folderCUD } from './extensions/folderCUD';
 import { fileCUD } from './extensions/fileCUD';
 import { populateArray } from './extensions/populateArray'; 
-import { gptTest1 } from './extensions/GPT_tests';
+import { gptTest1 } from './extensions/llmConnection';
 import { CodingBuddyViewProvider }  from './extensions/codingBuddyChat';
 
 // This method is called when your extension is activated
@@ -23,7 +23,7 @@ export function activate(context: vscode.ExtensionContext) {
 	
 	let manageWorkspaceFiles = vscode.commands.registerCommand('tests.manageFiles', async ()=> fileCUD());
 
-	let gptTests = vscode.commands.registerCommand('tests.chatGPT', async ()=> gptTest1());
+//	let gptTests = vscode.commands.registerCommand('tests.chatGPT', async ()=> gptTest1());
 	
 	const provider = new CodingBuddyViewProvider(context.extensionUri);
 
@@ -35,8 +35,7 @@ export function activate(context: vscode.ExtensionContext) {
 		displaySelectedText,
 		showFileTree, 
 		manageWorkspaceFolders,
-		manageWorkspaceFiles,
-		gptTests
+		manageWorkspaceFiles
 	);
 }
 

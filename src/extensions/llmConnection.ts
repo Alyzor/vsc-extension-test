@@ -4,15 +4,8 @@ import * as fileUtils from "../utils/fileManagement";
 
 const openai = new OpenAI();
 
-export async function gptTest1() {
-  const message = await vscode.window.showInputBox({
-    prompt: "Enter your message",
-    placeHolder: "Type your message here",
-  });
+export async function getLLMJson(message:string) {
 
-  if (!message) {
-    return;
-  }
   if(!vscode.window.activeTextEditor){ return; }
   let editorText = fileUtils.readOpenedFile(vscode.window.activeTextEditor);
   if(!editorText){ return;}
@@ -23,8 +16,10 @@ export async function gptTest1() {
   User's message:
   ` + message + `
 
+
+  ONLY READ THE CODE IF THE USER NEEDS HELP WITH CODING:
   User's code: 
-  ` + editorText + `
+  ` + editorText + ` 
   
   Your response should be in the following format:
   {
@@ -37,7 +32,7 @@ export async function gptTest1() {
     "code": "code" // the code to be inserted
     "lines": number, // the line where the code should be inserted (vscode.Line)
     "explanation": "explanation" //simple explanation of the code. ONLY USED IF "code" IS NOT EMPTY. If you need any additional information, please use the "additional_info_needed" field.
-    "chat":"chat" // in case you think the user only wants to chat, instead of coding help.
+    "chat":"chat" // in case you think the user only wants to chat, instead of coding help. If explanation is not empty, this field should be empty.
   }
   The response should only be in the above format, with no text outside the JSON object.
   `;
@@ -53,5 +48,9 @@ export async function gptTest1() {
     model: "gpt-4-turbo-preview",
   });
 
-  console.log(completion.choices[0]);
+  if(!completion.choices[0].message.content){ return;}
+
+  let response = JSON.parse(completion.choices[0].message.content);
+  console.log(response);
+  return response;
 }

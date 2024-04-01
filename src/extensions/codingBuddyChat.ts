@@ -1,4 +1,5 @@
 import * as vscode from "vscode";
+import * as gpt from "./llmConnection";
 
 export class CodingBuddyViewProvider implements vscode.WebviewViewProvider {
   public static readonly viewType = "tests.buddyWebview";
@@ -19,6 +20,19 @@ export class CodingBuddyViewProvider implements vscode.WebviewViewProvider {
     };
 
     webviewView.webview.html = await this._getHtmlForWebview(webviewView.webview);
+  
+    webviewView.webview.onDidReceiveMessage(async (data) => {
+      switch (data.type) {
+        case 'user-prompt':
+          let response = await gpt.getLLMJson(data.value);
+          if(response)
+          {
+            webviewView.webview.postMessage({type: 'response', value: response});
+          }
+          break;
+      }
+    });
+
   }
 
   
@@ -40,11 +54,14 @@ export class CodingBuddyViewProvider implements vscode.WebviewViewProvider {
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <link href="${codiconsUri}" rel="stylesheet">
       <link href="${styleUri}" rel="stylesheet">
-      <script nonce="${nonce}" src="${scriptUri}"></script>
+
       <title>Coding Buddy Chat</title>
     </head>`;
 
-    return header + htmlUri.toString();
+    const scriptLoad = `<script nonce="${nonce}" src="${scriptUri}"></script>
+    </body>
+    </html>`;
+    return header + htmlUri.toString() + scriptLoad;
 }
 }
 function getNonce() {
