@@ -5,8 +5,7 @@ import { displayHighlightedText } from './extensions/displayTextSelection';
 import { showOpenFolderTree } from './extensions/showOpenFolderTree';
 import { folderCUD } from './extensions/folderCUD';
 import { fileCUD } from './extensions/fileCUD';
-import { populateArray } from './extensions/populateArray'; 
-import { gptTest1 } from './extensions/llmConnection';
+import { populateArray } from './extensions/populateArray';
 import { CodingBuddyViewProvider }  from './extensions/codingBuddyChat';
 
 // This method is called when your extension is activated

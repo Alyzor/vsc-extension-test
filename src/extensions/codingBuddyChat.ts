@@ -30,6 +30,10 @@ export class CodingBuddyViewProvider implements vscode.WebviewViewProvider {
             webviewView.webview.postMessage({type: 'response', value: response});
           }
           break;
+        case 'requesting-history':
+          let history = await gpt.getMessageHistory();
+          webviewView.webview.postMessage({type: 'history', value: history});
+          break;
       }
     });
 

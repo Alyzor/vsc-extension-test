@@ -59,8 +59,9 @@ body {
 }
 
 .chatbox{
+    border-top:1px solid var(--vscode-activityBar-dropBorder);
     width:100%;
-    height:calc(100% - 4rem);
+    height:calc(100% - 4rem - 1px);
     overflow-y:auto;
 }
 

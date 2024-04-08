@@ -8,6 +8,7 @@ window.addEventListener('message', event =>{
     }
 });
 
+
 function addNewChatBox(message, isUser){
     let chatBox = document.createElement('div');
     chatBox.className = 'message-chat-box';
@@ -20,11 +21,19 @@ function addNewChatBox(message, isUser){
     chatBox.appendChild(name);
     chatBox.appendChild(messageBox);
 
-    document.getElementById('chat-container').appendChild(chatBox);
+    let container = document.getElementById('chat-container');
+    container.appendChild(chatBox);
+    container.scrollTop = container.scrollHeight;
+
 }
 
 (function(){
 const vscode = acquireVsCodeApi();
+
+window.onload = function(){
+    vscode.postMessage({type: 'requesting-history'});
+    console.log("Requesting history");
+};
 
 document.getElementById('send-button').addEventListener('click', ()=>{
     console.log("clicked!");
@@ -49,6 +58,20 @@ window.addEventListener('message', event =>{
             processLLMResponse(message.value);
             document.getElementById('message-box').ariaDisabled = false;
         break;
+        case 'history':
+            let messages = JSON.parse(message.value);
+            messages.forEach(element =>{
+                console.log(element["llm-response"].chat);
+                addNewChatBox(element["user-message"], true);
+                if(element["llm-response"].chat){
+                    addNewChatBox(element["llm-response"].chat, false);
+                }else{
+                    addNewChatBox(element["llm-response"].explanation, false);
+                }
+            });
+            document.getElementById('message-box').focus();
+            
+        break;
     }
 });
 console.log(document.getElementById('send-button'));
@@ -58,10 +81,11 @@ function processLLMResponse(response){
     ///document.getElementById('info-container').classList.add("hidden");
     if(response.chat){
         addNewChatBox(response.chat, false);
+    }else if(response.explanation){
+        addNewChatBox(response.explanation, false);
+    }else if(response.additional_info_needed){
+        showNeededInfo(response.additional_info_needed);
     }
-//else if(response.additional_info_needed){
-//    showNeededInfo(response.additional_info_needed);
-//}
 }
 
 function showNeededInfo(info){
